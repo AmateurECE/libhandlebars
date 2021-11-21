@@ -41,7 +41,7 @@
 // on the stack, created by the user, or created using one of the convenience
 // functions provided.
 typedef struct HbInputContext {
-    size_t (*read)(void* data, void* buffer, size_t buffer_size);
+    size_t (*read)(void* data, char* buffer, size_t buffer_size);
     void (*free_data)(void* data);
     void* data;
 } HbInputContext;

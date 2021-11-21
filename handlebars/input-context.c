@@ -30,11 +30,31 @@
 // IN THE SOFTWARE.
 ////
 
+#include <string.h>
+
 #include <handlebars/handlebars.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
 ////
+
+static size_t hb_priv_read_string(void* data, char* buffer, size_t buffer_size)
+{
+    const char* string = (const char*)data;
+    if ('\0' == *string) {
+        return 0;
+    }
+
+    size_t string_length = strlen(string);
+    if (string_length > buffer_size) {
+        string_length = buffer_size;
+    }
+
+    strncpy(buffer, data, string_length - 1);
+    buffer[string_length - 1] = '\0';
+    string += string_length;
+    return string_length;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
@@ -44,7 +64,17 @@ HbInputContext* handlebars_input_context_from_file(const char* filename)
 { return NULL; }
 
 HbInputContext* handlebars_input_context_from_string(const char* string)
-{ return NULL; }
+{
+    HbInputContext* context = malloc(sizeof(HbInputContext));
+    if (NULL == context) {
+        return NULL;
+    }
+
+    context->data = (void*)string;
+    context->free_data = NULL;
+    context->read = hb_priv_read_string;
+    return context;
+}
 
 void handlebars_input_context_free(HbInputContext** input_context)
 {
