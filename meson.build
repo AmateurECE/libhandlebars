@@ -36,6 +36,7 @@ run_command('peg', '-o', 'handlebars/parser.c', 'handlebars.peg', check: true)
 
 libhandlebars_sources = files([
   'handlebars/handlebars.c',
+  'handlebars/input-context.c',
 ])
 
 install_headers(

@@ -55,7 +55,7 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 // Public API
 ////
 
-Handlebars* handlebars_template_load_from_file(const char* filename) {
+Handlebars* handlebars_template_load(HbInputContext* input_context) {
     Handlebars* template = malloc(sizeof(Handlebars));
     if (NULL == template) {
         return NULL;

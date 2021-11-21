@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            main.c
+// NAME:            input-context.c
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Entrypoint for test application.
+// DESCRIPTION:     Implementation of input context handling
 //
-// CREATED:         11/20/2021
+// CREATED:         11/21/2021
 //
 // LAST EDITED:     11/21/2021
 //
@@ -32,12 +32,14 @@
 
 #include <handlebars/handlebars.h>
 
-int main() {
-    HbInputContext* input_context =
-        handlebars_input_context_from_file("test.hbs");
-    Handlebars* template = handlebars_template_load(input_context);
-    handlebars_input_context_free(input_context);
-    handlebars_template_free(&template);
-}
+///////////////////////////////////////////////////////////////////////////////
+// Public API
+////
+
+HbInputContext* handlebars_input_context_from_file(const char* filename)
+{ return NULL; }
+
+void handlebars_input_context_free(HbInputContext* input_context)
+{}
 
 ///////////////////////////////////////////////////////////////////////////////
