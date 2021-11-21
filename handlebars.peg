@@ -1,0 +1,6 @@
+
+document <- expression
+        / expression expression
+expression <- element
+        / " "
+element <- [0-9]

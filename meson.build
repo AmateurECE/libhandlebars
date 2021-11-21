@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/20/2021
+# LAST EDITED:      11/21/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -31,6 +31,8 @@
 ###
 
 project('libhandlebars', 'c', version: '0.1.0')
+
+run_command('peg', '-o', 'handlebars/parser.c', 'handlebars.peg', check: true)
 
 libhandlebars_sources = files([
   'handlebars/handlebars.c',

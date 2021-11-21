@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/20/2021
+// LAST EDITED:     11/21/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -34,6 +34,23 @@
 
 #include <handlebars/handlebars.h>
 
+typedef struct _yycontext yycontext;
+static void hb_priv_input(yycontext* context, char* buffer, int* result,
+    int max_size);
+#define YY_CTX_LOCAL 1
+#define YY_INPUT(context, buffer, result, max_size)     \
+    hb_priv_input(context, buffer, &result, max_size);
+#define YY_CTX_MEMBERS Handlebars* handlebars;
+#include "parser.c"
+
+///////////////////////////////////////////////////////////////////////////////
+// Private API
+////
+
+static void hb_priv_input(yycontext* context, char* buffer, int* result,
+    int max_size)
+{}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
 ////
@@ -44,6 +61,9 @@ Handlebars* handlebars_template_load_from_file(const char* filename) {
         return NULL;
     }
 
+    yycontext context;
+    memset(&context, 0, sizeof(yycontext));
+    while (yyparse(&context));
     return template;
 }
 
