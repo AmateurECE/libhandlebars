@@ -36,7 +36,7 @@ int main() {
     HbInputContext* input_context =
         handlebars_input_context_from_file("test.hbs");
     Handlebars* template = handlebars_template_load(input_context);
-    handlebars_input_context_free(input_context);
+    handlebars_input_context_free(&input_context);
     handlebars_template_free(&template);
 }
 

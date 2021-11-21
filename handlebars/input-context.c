@@ -33,13 +33,26 @@
 #include <handlebars/handlebars.h>
 
 ///////////////////////////////////////////////////////////////////////////////
+// Private API
+////
+
+///////////////////////////////////////////////////////////////////////////////
 // Public API
 ////
 
 HbInputContext* handlebars_input_context_from_file(const char* filename)
 { return NULL; }
 
-void handlebars_input_context_free(HbInputContext* input_context)
-{}
+HbInputContext* handlebars_input_context_from_string(const char* string)
+{ return NULL; }
+
+void handlebars_input_context_free(HbInputContext** input_context)
+{
+    if (NULL != *input_context) {
+        if (NULL != (*input_context)->free_data);
+        (*input_context)->free_data((*input_context)->data);
+        free(*input_context);
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////

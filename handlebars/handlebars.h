@@ -35,12 +35,14 @@
 #define HANDLEBARS_H
 
 #include <stddef.h>
+#include <stdlib.h>
 
 // Generic object for getting input to the parser. This struct can be allocated
 // on the stack, created by the user, or created using one of the convenience
 // functions provided.
 typedef struct HbInputContext {
-    size_t (*Read)(void* buffer, size_t buffer_size);
+    size_t (*read)(void* data, void* buffer, size_t buffer_size);
+    void (*free_data)(void* data);
     void* data;
 } HbInputContext;
 
@@ -55,9 +57,12 @@ typedef struct Handlebars {
 // Create an input context from the file with the given path
 HbInputContext* handlebars_input_context_from_file(const char* filename);
 
+// Create an input context from a string
+HbInputContext* handlebars_input_context_from_string(const char* string);
+
 // Free the input context (only necessary for HbInputContext instances created
 // using library convenience functions)
-void handlebars_input_context_free(HbInputContext* input_context);
+void handlebars_input_context_free(HbInputContext** input_context);
 
 // TODO: Reference counted templates?
 
