@@ -79,8 +79,9 @@ HbInputContext* handlebars_input_context_from_string(const char* string)
 void handlebars_input_context_free(HbInputContext** input_context)
 {
     if (NULL != *input_context) {
-        if (NULL != (*input_context)->free_data);
-        (*input_context)->free_data((*input_context)->data);
+        if (NULL != (*input_context)->free_data) {
+            (*input_context)->free_data((*input_context)->data);
+        }
         free(*input_context);
     }
 }

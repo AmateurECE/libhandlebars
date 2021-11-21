@@ -50,8 +50,9 @@ typedef struct HbTemplateContext {
     int unused;
 } HbTemplateContext;
 
+// Don't try to modify any of the members of this struct.
 typedef struct Handlebars {
-    int unused;
+    HbInputContext* input_context;
 } Handlebars;
 
 // Create an input context from the file with the given path

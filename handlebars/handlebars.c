@@ -47,9 +47,26 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 // Private API
 ////
 
+static void _Noreturn hb_assert(const char* message) {
+    fprintf(stderr, message);
+    exit(1);
+}
+
+// Invoke the HbInputContext to fill the parser buffer
 static void hb_priv_input(yycontext* context, char* buffer, int* result,
     int max_size)
-{}
+{
+    Handlebars* handlebars = context->handlebars;
+    HbInputContext* input_context = handlebars->input_context;
+    if (NULL == input_context) {
+        hb_assert("HbInputContext input to hb_priv_input is NULL! "
+            "This is a bug in the library");
+    }
+
+    int bytes_copied = input_context->read(input_context->data, buffer,
+        max_size);
+    *result = bytes_copied;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
@@ -61,9 +78,12 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
         return NULL;
     }
 
+    template->input_context = input_context;
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
+    context.handlebars = template;
     while (yyparse(&context));
+    template->input_context = NULL;
     return template;
 }
 
