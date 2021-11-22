@@ -31,8 +31,33 @@
 ////
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <handlebars/string.h>
+
+// Should probably get this with sysconf, but...eh.
+static const size_t DEFAULT_CAPACITY = 4096;
+
+///////////////////////////////////////////////////////////////////////////////
+// Private API
+////
+
+static int hb_priv_string_extend(HbString* first, size_t needed_capacity) {
+    size_t new_capacity = first->capacity;
+    while (new_capacity < needed_capacity)
+        new_capacity *= 2;
+    void* temp_string = realloc(first->string, new_capacity);
+    if (temp_string == first->string) {
+        first->capacity = new_capacity;
+        return 0;
+    } else if (temp_string == NULL) {
+        return 1;
+    } else {
+        first->string = temp_string;
+        first->capacity = new_capacity;
+        return 0;
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
@@ -44,10 +69,30 @@ HbString* hb_string_init() {
         return NULL;
     }
 
+    string->capacity = DEFAULT_CAPACITY;
+    string->string = malloc(DEFAULT_CAPACITY);
+    if (NULL == string->string) {
+        free(string);
+        return NULL;
+    }
+    string->length = 0;
     return string;
 }
 
-HbString* hb_string_append_str(HbString* first, const char* second)
-{ return NULL; }
+int hb_string_append_str(HbString* first, const char* second)
+{
+    const size_t append_length = strlen(second);
+    const size_t needed_capacity = append_length + first->length + 1;
+    if (needed_capacity > first->capacity) {
+        if (0 != hb_priv_string_extend(first, needed_capacity)) {
+            return 1;
+        }
+    }
+
+    strncpy(first->string, second, append_length + 1);
+    first->length = append_length + first->length;
+    first->string[first->length] = '\0';
+    return 0;
+}
 
 ///////////////////////////////////////////////////////////////////////////////

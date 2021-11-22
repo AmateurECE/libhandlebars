@@ -34,13 +34,15 @@
 #define HANDLEBARS_STRING_H
 
 typedef struct HbString {
-    int unused;
+    char* string;
+    size_t length;
+    size_t capacity;
 } HbString;
 
 HbString* hb_string_init();
 HbString* hb_string_from_str(const char* string);
-HbString* hb_string_append(HbString* first, HbString* second);
-HbString* hb_string_append_str(HbString* first, const char* second);
+int hb_string_append(HbString* first, HbString* second);
+int hb_string_append_str(HbString* first, const char* second);
 void hb_string_free(HbString** string);
 
 #endif // HANDLEBARS_STRING_H

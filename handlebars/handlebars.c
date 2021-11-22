@@ -76,14 +76,18 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
     context.handlebars = template;
+    hb_list_init(&template->parser_events);
     hb_event(template, SIGNAL_DOCUMENT_START);
 
     MealyFsm* parser_machine = hb_parser_machine_init(template);
     while (yyparse(&context))
         hb_parser_machine_iterate(parser_machine);
-    hb_parser_machine_free(&parser_machine);
 
     hb_event(template, SIGNAL_DOCUMENT_END);
+    hb_parser_machine_iterate(parser_machine);
+    hb_parser_machine_free(&parser_machine);
+    hb_list_free(&template->parser_events);
+
     template->input_context = NULL;
     return template;
 }

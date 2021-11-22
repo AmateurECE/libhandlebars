@@ -38,9 +38,33 @@
 // Public API
 ////
 
-void hb_list_init(HbList* list) {}
+void hb_list_init(HbList* list) {
+    list->head = NULL;
+    list->tail = NULL;
+}
 
 HbCons* hb_list_append(HbList* list, void* user_data)
-{ return NULL; }
+{
+    HbCons* cons = malloc(sizeof(HbCons));
+    if (NULL == cons) {
+        return NULL;
+    }
+
+    cons->next = NULL;
+    cons->data = user_data;
+    list->tail = cons;
+    if (NULL == list->head) {
+        list->head = cons;
+    }
+
+    return cons;
+}
+
+void hb_list_free(HbList** list) {
+    if (NULL != *list) {
+        free(*list);
+        *list = NULL;
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
