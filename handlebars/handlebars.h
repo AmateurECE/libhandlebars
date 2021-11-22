@@ -8,7 +8,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/21/2021
+// LAST EDITED:     11/22/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -37,7 +37,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-typedef struct HbCons HbCons;
+typedef struct HbList HbList;
 
 // Generic object for getting input to the parser. This struct can be allocated
 // on the stack, created by the user, or created using one of the convenience
@@ -55,7 +55,8 @@ typedef struct HbTemplateContext {
 // Don't try to modify any of the members of this struct.
 typedef struct Handlebars {
     HbInputContext* input_context;
-    HbCons* components;
+    HbList* components;
+    HbList* parser_events;
 } Handlebars;
 
 // Create an input context from the file with the given path

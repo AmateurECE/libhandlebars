@@ -34,7 +34,6 @@
 #include <stdlib.h>
 
 #include <handlebars/handlebars.h>
-#include <handlebars/internal.h>
 #include <handlebars/state-machine.h>
 
 typedef struct _yycontext yycontext;

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            internal.h
+// NAME:            linked-list.c
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Internal functions and utilities
+// DESCRIPTION:     Implementation of the linked list.
 //
-// CREATED:         11/21/2021
+// CREATED:         11/22/2021
 //
 // LAST EDITED:     11/22/2021
 //
@@ -30,19 +30,17 @@
 // IN THE SOFTWARE.
 ////
 
-#ifndef HANDLEBARS_INTERNAL_H
-#define HANDLEBARS_INTERNAL_H
-
-#include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-typedef struct HbCons HbCons;
-typedef struct HbCons {
-    void* data;
-    HbCons* next;
-} HbCons;
+#include <handlebars/linked-list.h>
 
-#endif // HANDLEBARS_INTERNAL_H
+///////////////////////////////////////////////////////////////////////////////
+// Public API
+////
+
+void hb_list_init(HbList* list) {}
+
+HbCons* hb_list_append(HbList* list, void* user_data)
+{ return NULL; }
 
 ///////////////////////////////////////////////////////////////////////////////

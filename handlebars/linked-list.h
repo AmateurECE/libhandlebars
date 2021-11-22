@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            state-machine.h
+// NAME:            linked-list.h
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     The parser state machine, for converting the token stream
-//                  into a renderable template
+// DESCRIPTION:     Linked List to support parser.
 //
-// CREATED:         11/21/2021
+// CREATED:         11/22/2021
 //
 // LAST EDITED:     11/22/2021
 //
@@ -31,42 +30,23 @@
 // IN THE SOFTWARE.
 ////
 
-#ifndef HANDLEBARS_STATE_MACHINE_H
-#define HANDLEBARS_STATE_MACHINE_H
+#ifndef HANDLEBARS_LINKED_LIST_H
+#define HANDLEBARS_LINKED_LIST_H
 
-typedef struct Handlebars Handlebars;
-typedef struct MealyFsm MealyFsm;
+typedef struct HbCons HbCons;
+typedef struct HbCons {
+    void* data;
+    HbCons* next;
+} HbCons;
 
-enum States {
-    STATE_INVALID,
-    STATE_TEXT,
-    STATE_TEMPLATE,
-    STATE_FINAL,
-};
+typedef struct HbList {
+    HbCons* head;
+    HbCons* tail;
+} HbList;
 
-enum Event {
-    SIGNAL_NONE,
-    SIGNAL_DOCUMENT_START,
-    SIGNAL_DOCUMENT_END,
-    SIGNAL_TEXT,
-    SIGNAL_START_TOKEN,
-    SIGNAL_END_TOKEN,
-};
+void hb_list_init(HbList* list);
+HbCons* hb_list_append(HbList* list, void* user_data);
 
-typedef struct HbString HbString;
-typedef struct HbParserEvent {
-    enum Event event;
-    HbString* string;
-} HbParserEvent;
-
-void hb_event(Handlebars* handlebars, enum Event event);
-void hb_string(Handlebars* handlebars, const char* string);
-int hb_read_event(int* state, void* user_data);
-
-MealyFsm* hb_parser_machine_init(Handlebars* handlebars);
-int hb_parser_machine_iterate(MealyFsm* machine);
-void hb_parser_machine_free(MealyFsm** machine);
-
-#endif // HANDLEBARS_STATE_MACHINE_H
+#endif // HANDLEBARS_LINKED_LIST_H
 
 ///////////////////////////////////////////////////////////////////////////////

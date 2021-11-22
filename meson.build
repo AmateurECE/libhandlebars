@@ -38,6 +38,8 @@ libhandlebars_sources = files([
   'handlebars/handlebars.c',
   'handlebars/input-context.c',
   'handlebars/state-machine.c',
+  'handlebars/string.c',
+  'handlebars/linked-list.c',
 ])
 
 install_headers(

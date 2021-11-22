@@ -38,7 +38,10 @@
 
 #include <fsautomata/mealy.h>
 
+#include <handlebars/handlebars.h>
+#include <handlebars/linked-list.h>
 #include <handlebars/state-machine.h>
+#include <handlebars/string.h>
 
 static const StateTransition text_tt[] = {
     { SIGNAL_DOCUMENT_START, 0, STATE_TEXT },
@@ -63,11 +66,27 @@ static void print_error(enum FsmFault fault) {
 
 void hb_event(Handlebars* handlebars, enum Event event)
 {
+    HbParserEvent* parser_event = malloc(sizeof(HbParserEvent));
+    assert(NULL != parser_event);
+    parser_event->event = event;
+    parser_event->string = hb_string_init();
+
+    HbCons* element = hb_list_append(handlebars->parser_events, parser_event);
+    // Would normally try to report the error here, but this function is called
+    // by the PEG parser.
+    assert(NULL != element);
     printf("\n%d\n", event);
 }
 
 void hb_string(Handlebars* handlebars, const char* string)
 {
+    HbCons* tail = handlebars->parser_events->tail;
+    // Would normally try to report the error here, but this function is called
+    // by the PEG parser.
+    assert(NULL != tail);
+
+    HbParserEvent* event = (HbParserEvent*)tail->data;
+    assert(NULL != hb_string_append_str(event->string, string));
     printf(string);
 }
 

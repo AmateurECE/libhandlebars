@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            state-machine.h
+// NAME:            string.c
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     The parser state machine, for converting the token stream
-//                  into a renderable template
+// DESCRIPTION:     Implementation of the String methods.
 //
-// CREATED:         11/21/2021
+// CREATED:         11/22/2021
 //
 // LAST EDITED:     11/22/2021
 //
@@ -31,42 +30,24 @@
 // IN THE SOFTWARE.
 ////
 
-#ifndef HANDLEBARS_STATE_MACHINE_H
-#define HANDLEBARS_STATE_MACHINE_H
+#include <stdlib.h>
 
-typedef struct Handlebars Handlebars;
-typedef struct MealyFsm MealyFsm;
+#include <handlebars/string.h>
 
-enum States {
-    STATE_INVALID,
-    STATE_TEXT,
-    STATE_TEMPLATE,
-    STATE_FINAL,
-};
+///////////////////////////////////////////////////////////////////////////////
+// Public API
+////
 
-enum Event {
-    SIGNAL_NONE,
-    SIGNAL_DOCUMENT_START,
-    SIGNAL_DOCUMENT_END,
-    SIGNAL_TEXT,
-    SIGNAL_START_TOKEN,
-    SIGNAL_END_TOKEN,
-};
+HbString* hb_string_init() {
+    HbString* string = malloc(sizeof(HbString));
+    if (NULL == string) {
+        return NULL;
+    }
 
-typedef struct HbString HbString;
-typedef struct HbParserEvent {
-    enum Event event;
-    HbString* string;
-} HbParserEvent;
+    return string;
+}
 
-void hb_event(Handlebars* handlebars, enum Event event);
-void hb_string(Handlebars* handlebars, const char* string);
-int hb_read_event(int* state, void* user_data);
-
-MealyFsm* hb_parser_machine_init(Handlebars* handlebars);
-int hb_parser_machine_iterate(MealyFsm* machine);
-void hb_parser_machine_free(MealyFsm** machine);
-
-#endif // HANDLEBARS_STATE_MACHINE_H
+HbString* hb_string_append_str(HbString* first, const char* second)
+{ return NULL; }
 
 ///////////////////////////////////////////////////////////////////////////////
