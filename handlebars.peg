@@ -1,8 +1,9 @@
 
 document <- expression+
-expression <- < [^\\] > starttoken { printf("START: %c\n", yytext); }
-        / endtoken { printf("END\n"); }
-        / < text > { printf("TT: %s\n", yytext); }
+expression <- < [^\\] > starttoken { hb_string(yy->handlebars, yytext);
+            hb_event(yy->handlebars, SIGNAL_START_TOKEN);  }
+        / endtoken { hb_event(yy->handlebars, SIGNAL_END_TOKEN); }
+        / < text > { hb_string(yy->handlebars, yytext); }
 starttoken <- "{{"
 endtoken <- "}}"
 text <- token

@@ -1,9 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            internal.h
+// NAME:            state-machine.h
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Internal functions and utilities
+// DESCRIPTION:     The parser state machine, for converting the token stream
+//                  into a renderable template
 //
 // CREATED:         11/21/2021
 //
@@ -30,19 +31,31 @@
 // IN THE SOFTWARE.
 ////
 
-#ifndef HANDLEBARS_INTERNAL_H
-#define HANDLEBARS_INTERNAL_H
+#ifndef HANDLEBARS_STATE_MACHINE_H
+#define HANDLEBARS_STATE_MACHINE_H
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+typedef struct Handlebars Handlebars;
 
-typedef struct HbCons HbCons;
-typedef struct HbCons {
-    void* data;
-    HbCons* next;
-} HbCons;
+enum States {
+    STATE_INVALID,
+    STATE_TEXT,
+    STATE_TEMPLATE,
+    STATE_FINAL,
+};
 
-#endif // HANDLEBARS_INTERNAL_H
+enum Event {
+    SIGNAL_NONE,
+    SIGNAL_DOCUMENT_START,
+    SIGNAL_DOCUMENT_END,
+    SIGNAL_TEXT,
+    SIGNAL_START_TOKEN,
+    SIGNAL_END_TOKEN,
+};
+
+void hb_event(Handlebars* handlebars, enum Event event);
+void hb_string(Handlebars* handlebars, const char* string);
+enum Event hb_read_event(int* state, void* user_data);
+
+#endif // HANDLEBARS_STATE_MACHINE_H
 
 ///////////////////////////////////////////////////////////////////////////////

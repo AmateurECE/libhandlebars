@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/21/2021
+// LAST EDITED:     11/22/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -30,10 +30,12 @@
 // IN THE SOFTWARE.
 ////
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include <handlebars/handlebars.h>
 #include <handlebars/internal.h>
+#include <handlebars/state-machine.h>
 
 typedef struct _yycontext yycontext;
 static void hb_priv_input(yycontext* context, char* buffer, int* result,
@@ -54,10 +56,7 @@ void hb_priv_input(yycontext* context, char* buffer, int* result,
 {
     Handlebars* handlebars = context->handlebars;
     HbInputContext* input_context = handlebars->input_context;
-    if (NULL == input_context) {
-        hb_assert("HbInputContext input to hb_priv_input is NULL! "
-            "This is a bug in the library");
-    }
+    assert(NULL != input_context);
 
     int bytes_copied = input_context->read(input_context->data, buffer,
         max_size);
@@ -78,7 +77,9 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
     context.handlebars = template;
+    hb_event(template, SIGNAL_DOCUMENT_START);
     while (yyparse(&context));
+    hb_event(template, SIGNAL_DOCUMENT_END);
     template->input_context = NULL;
     return template;
 }
