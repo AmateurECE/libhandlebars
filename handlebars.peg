@@ -1,6 +1,9 @@
 
-document <- expression
-        / expression expression
-expression <- element
-        / " "
-element <- [0-9]
+document <- expression+
+expression <- < [^\\] > starttoken { printf("START: %c\n", yytext); }
+        / endtoken { printf("END\n"); }
+        / < text > { printf("TT: %s\n", yytext); }
+starttoken <- "{{"
+endtoken <- "}}"
+text <- token
+token <- .

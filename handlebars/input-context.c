@@ -34,25 +34,29 @@
 
 #include <handlebars/handlebars.h>
 
+typedef struct HbStringInput {
+    const char* string;
+    size_t position;
+} HbStringInput;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
 ////
 
-static size_t hb_priv_read_string(void* data, char* buffer, size_t buffer_size)
+size_t hb_priv_read_string(void* data, char* buffer, size_t buffer_size)
 {
-    const char* string = (const char*)data;
-    if ('\0' == *string) {
+    HbStringInput* input = (HbStringInput*)data;
+    if ('\0' == input->string[input->position]) {
         return 0;
     }
 
-    size_t string_length = strlen(string);
+    size_t string_length = strlen(input->string);
     if (string_length > buffer_size) {
         string_length = buffer_size;
     }
 
-    strncpy(buffer, data, string_length - 1);
-    buffer[string_length - 1] = '\0';
-    string += string_length;
+    strncpy(buffer, input->string + input->position, string_length);
+    input->position += string_length;
     return string_length;
 }
 
@@ -70,8 +74,16 @@ HbInputContext* handlebars_input_context_from_string(const char* string)
         return NULL;
     }
 
-    context->data = (void*)string;
-    context->free_data = NULL;
+    HbStringInput* input = malloc(sizeof(HbStringInput));
+    if (NULL == input) {
+        free(context);
+        return NULL;
+    }
+
+    input->string = string;
+    input->position = 0;
+    context->data = input;
+    context->free_data = free;
     context->read = hb_priv_read_string;
     return context;
 }

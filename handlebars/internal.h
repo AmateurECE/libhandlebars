@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            main.c
+// NAME:            internal.h
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Entrypoint for test application.
+// DESCRIPTION:     Internal functions and utilities
 //
-// CREATED:         11/20/2021
+// CREATED:         11/21/2021
 //
 // LAST EDITED:     11/21/2021
 //
@@ -30,18 +30,20 @@
 // IN THE SOFTWARE.
 ////
 
-#include <handlebars/handlebars.h>
+#ifndef HANDLEBARS_INTERNAL_H
+#define HANDLEBARS_INTERNAL_H
 
-const char* template_string = "\
-Some {{test}}\n\
-";
+#include <stdio.h>
 
-int main() {
-    HbInputContext* input_context =
-        handlebars_input_context_from_string(template_string);
-    Handlebars* template = handlebars_template_load(input_context);
-    handlebars_input_context_free(&input_context);
-    handlebars_template_free(&template);
+static void _Noreturn hb_assert(const char* message) {
+    fprintf(stderr, message);
+    exit(1);
 }
+
+typedef struct HbCons {
+    int unused;
+} HbCons;
+
+#endif // HANDLEBARS_INTERNAL_H
 
 ///////////////////////////////////////////////////////////////////////////////

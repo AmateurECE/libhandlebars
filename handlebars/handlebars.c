@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include <handlebars/handlebars.h>
+#include <handlebars/internal.h>
 
 typedef struct _yycontext yycontext;
 static void hb_priv_input(yycontext* context, char* buffer, int* result,
@@ -47,13 +48,8 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 // Private API
 ////
 
-static void _Noreturn hb_assert(const char* message) {
-    fprintf(stderr, message);
-    exit(1);
-}
-
 // Invoke the HbInputContext to fill the parser buffer
-static void hb_priv_input(yycontext* context, char* buffer, int* result,
+void hb_priv_input(yycontext* context, char* buffer, int* result,
     int max_size)
 {
     Handlebars* handlebars = context->handlebars;

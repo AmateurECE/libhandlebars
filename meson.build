@@ -47,12 +47,14 @@ libhandlebars = library(
   'handlebars',
   sources: libhandlebars_sources,
   install: true,
+  c_args: ['-Wall', '-Wextra', '-g', '-O0'],
 )
 
 executable(
   'testhandlebars',
   'test/main.c',
   link_with: [libhandlebars],
+  c_args: ['-Wall', '-Wextra', '-g', '-O0'],
 )
 
 ###############################################################################

@@ -37,6 +37,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+typedef struct HbCons HbCons;
+
 // Generic object for getting input to the parser. This struct can be allocated
 // on the stack, created by the user, or created using one of the convenience
 // functions provided.
@@ -53,6 +55,7 @@ typedef struct HbTemplateContext {
 // Don't try to modify any of the members of this struct.
 typedef struct Handlebars {
     HbInputContext* input_context;
+    HbCons* components;
 } Handlebars;
 
 // Create an input context from the file with the given path
