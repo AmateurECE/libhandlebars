@@ -35,6 +35,7 @@
 #define HANDLEBARS_STATE_MACHINE_H
 
 typedef struct Handlebars Handlebars;
+typedef struct MealyFsm MealyFsm;
 
 enum States {
     STATE_INVALID,
@@ -54,7 +55,11 @@ enum Event {
 
 void hb_event(Handlebars* handlebars, enum Event event);
 void hb_string(Handlebars* handlebars, const char* string);
-enum Event hb_read_event(int* state, void* user_data);
+int hb_read_event(int* state, void* user_data);
+
+MealyFsm* hb_parser_machine_init(Handlebars* handlebars);
+int hb_parser_machine_iterate(MealyFsm* machine);
+void hb_parser_machine_free(MealyFsm** machine);
 
 #endif // HANDLEBARS_STATE_MACHINE_H
 

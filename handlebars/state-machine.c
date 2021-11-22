@@ -71,10 +71,10 @@ void hb_string(Handlebars* handlebars, const char* string)
     printf(string);
 }
 
-enum Event hb_read_event(int* state, void* user_data)
+int hb_read_event(int* state, void* user_data)
 { return 0; }
 
-MealyFsm* hb_parser_machine_initialize(Handlebars* handlebars) {
+MealyFsm* hb_parser_machine_init(Handlebars* handlebars) {
     MealyFsm* machine = malloc(sizeof(MealyFsm));
     if (NULL == machine) {
         return NULL;
@@ -84,7 +84,7 @@ MealyFsm* hb_parser_machine_initialize(Handlebars* handlebars) {
         .states = state_table,
         .initial_state = STATE_TEXT,
         .final_states = final_states,
-        .user_data = NULL,
+        .user_data = handlebars,
     };
     memcpy(machine, &copy_machine, sizeof(MealyFsm));
 
