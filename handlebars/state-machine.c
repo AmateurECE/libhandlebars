@@ -75,7 +75,7 @@ void hb_event(Handlebars* handlebars, enum Event event)
     // Would normally try to report the error here, but this function is called
     // by the PEG parser.
     assert(NULL != element);
-    printf("\n%d\n", event);
+    printf("%d\n", event);
 }
 
 void hb_string(Handlebars* handlebars, const char* string)
@@ -86,12 +86,25 @@ void hb_string(Handlebars* handlebars, const char* string)
     assert(NULL != tail);
 
     HbParserEvent* event = (HbParserEvent*)tail->data;
-    assert(NULL != hb_string_append_str(event->string, string));
-    printf(string);
+    assert(0 == hb_string_append_str(event->string, string));
+    printf("'%s'\n", string);
 }
 
-int hb_read_event(int* state, void* user_data)
-{ return 0; }
+int hb_read_event(int* state __attribute__((unused)), void* user_data)
+{
+    Handlebars* handlebars = (Handlebars*)user_data;
+    if (handlebars->parser_events->length < 1) {
+        return 0;
+    }
+
+    HbCons* element = hb_list_pop_front(handlebars->parser_events);
+    assert(NULL != element);
+    HbParserEvent* event = element->data;
+    assert(NULL != event);
+    // TODO: Handle event
+    free(event);
+    return event->event;
+}
 
 MealyFsm* hb_parser_machine_init(Handlebars* handlebars) {
     MealyFsm* machine = malloc(sizeof(MealyFsm));

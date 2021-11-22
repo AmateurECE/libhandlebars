@@ -42,10 +42,12 @@ typedef struct HbCons {
 typedef struct HbList {
     HbCons* head;
     HbCons* tail;
+    size_t length;
 } HbList;
 
 void hb_list_init(HbList* list);
 HbCons* hb_list_append(HbList* list, void* user_data);
+void* hb_list_pop_front(HbList* list);
 
 #endif // HANDLEBARS_LINKED_LIST_H
 

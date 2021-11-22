@@ -34,6 +34,7 @@
 #include <stdlib.h>
 
 #include <handlebars/handlebars.h>
+#include <handlebars/linked-list.h>
 #include <handlebars/state-machine.h>
 
 typedef struct _yycontext yycontext;
@@ -76,7 +77,12 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
     context.handlebars = template;
-    hb_list_init(&template->parser_events);
+    template->parser_events = malloc(sizeof(HbList));
+    if (NULL == template->parser_events) {
+        free(template);
+        return NULL;
+    }
+    hb_list_init(template->parser_events);
     hb_event(template, SIGNAL_DOCUMENT_START);
 
     MealyFsm* parser_machine = hb_parser_machine_init(template);
@@ -86,7 +92,7 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     hb_event(template, SIGNAL_DOCUMENT_END);
     hb_parser_machine_iterate(parser_machine);
     hb_parser_machine_free(&parser_machine);
-    hb_list_free(&template->parser_events);
+    free(template->parser_events);
 
     template->input_context = NULL;
     return template;

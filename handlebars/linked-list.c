@@ -57,14 +57,16 @@ HbCons* hb_list_append(HbList* list, void* user_data)
         list->head = cons;
     }
 
+    list->length += 1;
     return cons;
 }
 
-void hb_list_free(HbList** list) {
-    if (NULL != *list) {
-        free(*list);
-        *list = NULL;
+void* hb_list_pop_front(HbList* list) {
+    if (NULL == list->head) {
+        return NULL;
     }
+
+    HbCons* element = list->head;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
