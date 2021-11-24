@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/22/2021
+// LAST EDITED:     11/23/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -36,7 +36,7 @@
 #include <handlebars/string.h>
 
 // Should probably get this with sysconf, but...eh.
-static const size_t DEFAULT_CAPACITY = 4096;
+static const size_t DEFAULT_CAPACITY = 1024;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
@@ -76,6 +76,19 @@ HbString* hb_string_init() {
         return NULL;
     }
     string->length = 0;
+    return string;
+}
+
+HbString* hb_string_copy_from_str(const char* content) {
+    HbString* string = hb_string_init();
+    if (NULL == string) {
+        return NULL;
+    }
+
+    if (0 != hb_string_append_str(string, content)) {
+        free(string);
+        return NULL;
+    }
     return string;
 }
 

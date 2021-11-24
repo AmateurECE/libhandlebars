@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/22/2021
+// LAST EDITED:     11/23/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -43,7 +43,7 @@ void hb_list_init(HbList* list) {
     list->tail = NULL;
 }
 
-HbCons* hb_list_append(HbList* list, void* user_data)
+HbCons* hb_list_push_back(HbList* list, void* user_data)
 {
     HbCons* cons = malloc(sizeof(HbCons));
     if (NULL == cons) {

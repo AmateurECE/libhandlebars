@@ -37,17 +37,17 @@
 #include <handlebars/linked-list.h>
 #include <handlebars/string.h>
 
-enum Event {
-    EVENT_TEXT,
-    EVENT_EXPRESSION,
+enum HbComponentType {
+    HB_TEXT,
+    HB_EXPRESSION,
 };
 
-typedef struct HbParserEvent {
-    enum Event event;
+typedef struct HbComponent {
+    enum HbComponentType type;
     HbString* string;
-} HbParserEvent;
+} HbComponent;
 
-static void hb_event(Handlebars* handlebars, enum Event event,
+static void hb_event(Handlebars* handlebars, enum HbComponentType event,
     const char* content);
 typedef struct _yycontext yycontext;
 static void hb_priv_input(yycontext* context, char* buffer, int* result,
@@ -62,10 +62,18 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 // Private API
 ////
 
-static void hb_event(Handlebars* handlebars, enum Event event,
+static void hb_event(Handlebars* handlebars, enum HbComponentType type,
     const char* content)
 {
-    printf("%d: \"%s\"\n", event, content);
+    HbComponent* component = malloc(sizeof(HbComponent));
+    assert(NULL != component);
+    HbString* string = hb_string_copy_from_str(content);
+    assert(NULL != string);
+
+    component->string = string;
+    component->type = type;
+    hb_list_push_back(handlebars->components, component);
+    printf("%d: \"%s\"\n", type, content);
 }
 
 // Invoke the HbInputContext to fill the parser buffer
@@ -95,16 +103,14 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
     context.handlebars = template;
-    template->parser_events = malloc(sizeof(HbList));
-    if (NULL == template->parser_events) {
+    template->components = malloc(sizeof(HbList));
+    if (NULL == template->components) {
         free(template);
         return NULL;
     }
-    hb_list_init(template->parser_events);
+    hb_list_init(template->components);
 
     while (yyparse(&context));
-
-    free(template->parser_events);
 
     template->input_context = NULL;
     return template;

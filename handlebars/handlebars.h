@@ -8,7 +8,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/22/2021
+// LAST EDITED:     11/23/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -56,7 +56,6 @@ typedef struct HbTemplateContext {
 typedef struct Handlebars {
     HbInputContext* input_context;
     HbList* components;
-    HbList* parser_events;
 } Handlebars;
 
 // Create an input context from the file with the given path

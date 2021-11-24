@@ -1,6 +1,6 @@
 
 expression <- "{{" < handlebars* > "}}" {
-            hb_event(yy->handlebars, EVENT_EXPRESSION, yytext); }
-        / < not_handlebars+ > { hb_event(yy->handlebars, EVENT_TEXT, yytext); }
+            hb_event(yy->handlebars, HB_EXPRESSION, yytext); }
+        / < not_handlebars+ > { hb_event(yy->handlebars, HB_TEXT, yytext); }
 not_handlebars <- !"{{" .
 handlebars <- !"}}" .
