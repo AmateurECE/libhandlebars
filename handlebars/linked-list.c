@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/23/2021
+// LAST EDITED:     11/24/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -52,21 +52,37 @@ HbCons* hb_list_push_back(HbList* list, void* user_data)
 
     cons->next = NULL;
     cons->data = user_data;
-    list->tail = cons;
     if (NULL == list->head) {
         list->head = cons;
     }
+
+    if (NULL != list->tail) {
+        list->tail->next = cons;
+    }
+    list->tail = cons;
 
     list->length += 1;
     return cons;
 }
 
-void* hb_list_pop_front(HbList* list) {
-    if (NULL == list->head) {
-        return NULL;
+void hb_list_free(HbList** list, void (*free_data)(void*)) {
+    if (NULL == *list) {
+        return;
     }
 
-    HbCons* element = list->head;
+    HbCons* current = NULL;
+    HbCons* next = (*list)->head;
+    while (NULL != next) {
+        current = next;
+        if (NULL != free_data) {
+            free_data(current->data);
+        }
+        next = current->next;
+        free(current);
+    }
+
+    free(*list);
+    *list = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

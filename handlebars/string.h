@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/23/2021
+// LAST EDITED:     11/24/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -40,7 +40,7 @@ typedef struct HbString {
 } HbString;
 
 HbString* hb_string_init();
-HbString* hb_string_copy_from_str(const char* string);
+HbString* hb_string_from_str(const char* string);
 int hb_string_append(HbString* first, HbString* second);
 int hb_string_append_str(HbString* first, const char* second);
 void hb_string_free(HbString** string);

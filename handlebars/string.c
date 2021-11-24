@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/23/2021
+// LAST EDITED:     11/24/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -35,8 +35,9 @@
 
 #include <handlebars/string.h>
 
-// Should probably get this with sysconf, but...eh.
-static const size_t DEFAULT_CAPACITY = 1024;
+// Attempt to make it easy on myself by making the default size the size of a
+// cache line?
+static const size_t DEFAULT_CAPACITY = 64;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
@@ -79,7 +80,7 @@ HbString* hb_string_init() {
     return string;
 }
 
-HbString* hb_string_copy_from_str(const char* content) {
+HbString* hb_string_from_str(const char* content) {
     HbString* string = hb_string_init();
     if (NULL == string) {
         return NULL;
@@ -106,6 +107,14 @@ int hb_string_append_str(HbString* first, const char* second)
     first->length = append_length + first->length;
     first->string[first->length] = '\0';
     return 0;
+}
+
+void hb_string_free(HbString** string) {
+    if (NULL != *string) {
+        free((*string)->string);
+        free(*string);
+        *string = NULL;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/23/2021
+// LAST EDITED:     11/24/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -47,7 +47,7 @@ typedef struct HbList {
 
 void hb_list_init(HbList* list);
 HbCons* hb_list_push_back(HbList* list, void* user_data);
-void* hb_list_pop_front(HbList* list);
+void hb_list_free(HbList** list, void (*free_data)(void*));
 
 #endif // HANDLEBARS_LINKED_LIST_H
 

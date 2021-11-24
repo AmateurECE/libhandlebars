@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/23/2021
+// LAST EDITED:     11/24/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -67,13 +67,19 @@ static void hb_event(Handlebars* handlebars, enum HbComponentType type,
 {
     HbComponent* component = malloc(sizeof(HbComponent));
     assert(NULL != component);
-    HbString* string = hb_string_copy_from_str(content);
+    HbString* string = hb_string_from_str(content);
     assert(NULL != string);
 
     component->string = string;
     component->type = type;
     hb_list_push_back(handlebars->components, component);
     printf("%d: \"%s\"\n", type, content);
+}
+
+static void hb_priv_free_component(void* element_data) {
+    HbComponent* component = (HbComponent*)element_data;
+    hb_string_free(&component->string);
+    free(component);
 }
 
 // Invoke the HbInputContext to fill the parser buffer
@@ -112,6 +118,7 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
 
     while (yyparse(&context));
 
+    yyrelease(&context);
     template->input_context = NULL;
     return template;
 }
@@ -122,6 +129,11 @@ char* handlebars_render_template(Handlebars* template,
 
 void handlebars_template_free(Handlebars** template) {
     if (NULL != *template) {
+        if (NULL != (*template)->components) {
+            hb_list_free(&(*template)->components, hb_priv_free_component);
+            free((*template)->components);
+        }
+
         free(*template);
         *template = NULL;
     }
