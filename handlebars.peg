@@ -1,10 +1,5 @@
 
-document <- expression+
-expression <- < [^\\] > starttoken { hb_string(yy->handlebars, yytext);
-            hb_event(yy->handlebars, SIGNAL_START_TOKEN);  }
-        / endtoken { hb_event(yy->handlebars, SIGNAL_END_TOKEN); }
-        / < text > { hb_string(yy->handlebars, yytext); }
-starttoken <- "{{"
-endtoken <- "}}"
-text <- token
-token <- .
+expression <- "{{" < handlebars* > "}}" { printf("\"%s\"\n", yytext); }
+        / < not_handlebars+ > { printf("\"%s\"\n", yytext); }
+not_handlebars <- !"{{" .
+handlebars <- !"}}" .
