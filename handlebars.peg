@@ -1,5 +1,6 @@
 
-expression <- "{{" < handlebars* > "}}" { printf("\"%s\"\n", yytext); }
-        / < not_handlebars+ > { printf("\"%s\"\n", yytext); }
+expression <- "{{" < handlebars* > "}}" {
+            hb_event(yy->handlebars, EVENT_EXPRESSION, yytext); }
+        / < not_handlebars+ > { hb_event(yy->handlebars, EVENT_TEXT, yytext); }
 not_handlebars <- !"{{" .
 handlebars <- !"}}" .

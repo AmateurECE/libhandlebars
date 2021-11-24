@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/22/2021
+// LAST EDITED:     11/23/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -35,8 +35,20 @@
 
 #include <handlebars/handlebars.h>
 #include <handlebars/linked-list.h>
-#include <handlebars/state-machine.h>
+#include <handlebars/string.h>
 
+enum Event {
+    EVENT_TEXT,
+    EVENT_EXPRESSION,
+};
+
+typedef struct HbParserEvent {
+    enum Event event;
+    HbString* string;
+} HbParserEvent;
+
+static void hb_event(Handlebars* handlebars, enum Event event,
+    const char* content);
 typedef struct _yycontext yycontext;
 static void hb_priv_input(yycontext* context, char* buffer, int* result,
     int max_size);
@@ -49,6 +61,12 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
 ////
+
+static void hb_event(Handlebars* handlebars, enum Event event,
+    const char* content)
+{
+    printf("%d: \"%s\"\n", event, content);
+}
 
 // Invoke the HbInputContext to fill the parser buffer
 void hb_priv_input(yycontext* context, char* buffer, int* result,
@@ -83,15 +101,9 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
         return NULL;
     }
     hb_list_init(template->parser_events);
-    hb_event(template, SIGNAL_DOCUMENT_START);
 
-    MealyFsm* parser_machine = hb_parser_machine_init(template);
-    while (yyparse(&context))
-        hb_parser_machine_iterate(parser_machine);
+    while (yyparse(&context));
 
-    hb_event(template, SIGNAL_DOCUMENT_END);
-    hb_parser_machine_iterate(parser_machine);
-    hb_parser_machine_free(&parser_machine);
     free(template->parser_events);
 
     template->input_context = NULL;

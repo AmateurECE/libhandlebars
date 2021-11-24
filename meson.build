@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/22/2021
+# LAST EDITED:      11/23/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -37,7 +37,6 @@ run_command('peg', '-o', 'handlebars/parser.c', 'handlebars.peg', check: true)
 libhandlebars_sources = files([
   'handlebars/handlebars.c',
   'handlebars/input-context.c',
-  'handlebars/state-machine.c',
   'handlebars/string.c',
   'handlebars/linked-list.c',
 ])
