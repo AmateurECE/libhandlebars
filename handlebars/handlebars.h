@@ -8,7 +8,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/23/2021
+// LAST EDITED:     11/24/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -49,7 +49,7 @@ typedef struct HbInputContext {
 } HbInputContext;
 
 typedef struct HbTemplateContext {
-    int unused;
+    HbList* context;
 } HbTemplateContext;
 
 // Don't try to modify any of the members of this struct.
@@ -79,6 +79,16 @@ char* handlebars_render_template(Handlebars* template,
 
 // Free the template
 void handlebars_template_free(Handlebars** template);
+
+HbTemplateContext* handlebars_template_context_init();
+void handlebars_template_context_free(HbTemplateContext** context);
+
+// Set a string in the context
+int handlebars_template_context_set_string(HbTemplateContext* context,
+    const char* key, const char* value);
+
+// TODO: handlebars_template_context_set_object
+// TODO: handlebars_template_context_set_int
 
 #endif // HANDLEBARS_H
 

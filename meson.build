@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/23/2021
+# LAST EDITED:      11/25/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -39,19 +39,17 @@ libhandlebars_sources = files([
   'handlebars/input-context.c',
   'handlebars/string.c',
   'handlebars/linked-list.c',
+  'handlebars/template-context.c',
 ])
 
 install_headers(
   'handlebars/handlebars.h',
 )
 
-libfsautomata = dependency('libfsautomata')
-
 libhandlebars = library(
   'handlebars',
   sources: libhandlebars_sources,
   install: true,
-  dependencies: [libfsautomata],
   c_args: ['-Wall', '-Wextra', '-g', '-O0'],
 )
 
