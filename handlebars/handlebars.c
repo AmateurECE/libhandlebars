@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/24/2021
+// LAST EDITED:     11/25/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -34,8 +34,8 @@
 #include <stdlib.h>
 
 #include <handlebars/handlebars.h>
-#include <handlebars/linked-list.h>
 #include <handlebars/string.h>
+#include <handlebars/vector.h>
 
 enum HbComponentType {
     HB_TEXT,
@@ -72,7 +72,7 @@ static void hb_event(Handlebars* handlebars, enum HbComponentType type,
 
     component->string = string;
     component->type = type;
-    hb_list_push_back(handlebars->components, component);
+    hb_vector_push_back(handlebars->components, component);
     printf("%d: \"%s\"\n", type, content);
 }
 
@@ -109,12 +109,12 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
     context.handlebars = template;
-    template->components = malloc(sizeof(HbList));
+    template->components = malloc(sizeof(HbVector));
     if (NULL == template->components) {
         free(template);
         return NULL;
     }
-    hb_list_init(template->components);
+    hb_vector_init(template->components);
 
     while (yyparse(&context));
 
@@ -130,7 +130,7 @@ char* handlebars_render_template(Handlebars* template,
 void handlebars_template_free(Handlebars** template) {
     if (NULL != *template) {
         if (NULL != (*template)->components) {
-            hb_list_free(&(*template)->components, hb_priv_free_component);
+            hb_vector_free(&(*template)->components, hb_priv_free_component);
             free((*template)->components);
         }
 

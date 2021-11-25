@@ -31,8 +31,8 @@
 ////
 
 #include <handlebars/handlebars.h>
-#include <handlebars/linked-list.h>
 #include <handlebars/string.h>
+#include <handlebars/vector.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
@@ -60,7 +60,7 @@ HbTemplateContext* handlebars_template_context_init() {
         return NULL;
     }
 
-    hb_list_init(context->context);
+    hb_vector_init(context->context);
     if (NULL == context->context) {
         free(context);
         return NULL;
@@ -74,7 +74,7 @@ void handlebars_template_context_free(HbTemplateContext** context) {
         return;
     }
 
-    hb_list_free((*context)->context, hb_priv_context_entry_free);
+    hb_vector_free((*context)->context, hb_priv_context_entry_free);
     free(*context);
     *context = NULL;
 }

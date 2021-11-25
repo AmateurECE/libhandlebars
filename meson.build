@@ -38,7 +38,6 @@ libhandlebars_sources = files([
   'handlebars/handlebars.c',
   'handlebars/input-context.c',
   'handlebars/string.c',
-  'handlebars/linked-list.c',
   'handlebars/vector.c',
   'handlebars/template-context.c',
 ])

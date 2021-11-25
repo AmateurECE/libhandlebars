@@ -43,7 +43,7 @@ typedef struct HbVector {
 
 HbVector* hb_vector_init();
 int hb_vector_push_back(HbVector* vector, void* user_data);
-void hb_vector_free(HbVector**);
+void hb_vector_free(HbVector**, void (*free_data)(void*));
 
 #endif // HANDLEBARS_VECTOR_H
 

@@ -91,12 +91,20 @@ int hb_vector_push_back(HbVector* vector, void* user_data) {
     return 0;
 }
 
-void hb_vector_free(HbVector** vector) {
-    if (NULL != *vector) {
-        free((*vector)->vector);
-        free(*vector);
-        *vector = NULL;
+void hb_vector_free(HbVector** vector, void (*free_data)(void*)) {
+    if (NULL == *vector) {
+        return;
     }
+
+    if (NULL != free_data) {
+        for (size_t i = 0; i < (*vector)->length; ++i) {
+            free_data((*vector)->vector[i]);
+        }
+    }
+
+    free((*vector)->vector);
+    free(*vector);
+    *vector = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
