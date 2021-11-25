@@ -34,7 +34,7 @@
 
 #include <handlebars/handlebars.h>
 
-static const char* template_text = "Some {{test}}\n";
+static const char* template_text = "Some {{ test }}\n";
 
 int main() {
     HbInputContext* input_context =
