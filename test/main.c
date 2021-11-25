@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/23/2021
+// LAST EDITED:     11/25/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -30,16 +30,26 @@
 // IN THE SOFTWARE.
 ////
 
+#include <stdio.h>
+
 #include <handlebars/handlebars.h>
 
-int main(int argc, char** argv) {
-    if (argc < 2) {
+static const char* template_text = "Some {{test}}\n";
+
+int main() {
+    HbInputContext* input_context =
+        handlebars_input_context_from_string(template_text);
+    Handlebars* template = handlebars_template_load(input_context);
+    HbTemplateContext* template_context = handlebars_template_context_init();
+    handlebars_template_context_set_string(template_context, "test", "thing");
+    HbString* output = handlebars_render_template(template, template_context);
+    if (NULL == output) {
         return 1;
     }
 
-    HbInputContext* input_context =
-        handlebars_input_context_from_string(argv[1]);
-    Handlebars* template = handlebars_template_load(input_context);
+    printf("%s", output->string);
+    hb_string_free(&output);
+    handlebars_template_context_free(&template_context);
     handlebars_input_context_free(&input_context);
     handlebars_template_free(&template);
 }

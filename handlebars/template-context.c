@@ -30,8 +30,9 @@
 // IN THE SOFTWARE.
 ////
 
+#include <string.h>
+
 #include <handlebars/handlebars.h>
-#include <handlebars/string.h>
 #include <handlebars/vector.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,6 +112,19 @@ int handlebars_template_context_set_string(HbTemplateContext* context,
     }
 
     return 0;
+}
+
+const HbString* handlebars_template_context_get(HbTemplateContext* context,
+    HbString* key)
+{
+    for (size_t i = 0; i < context->context->length; ++i) {
+        HbContextEntry* entry = (HbContextEntry*)context->context->vector[i];
+        if (!strcmp(key->string, entry->key->string)) {
+            return entry->value;
+        }
+    }
+
+    return NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

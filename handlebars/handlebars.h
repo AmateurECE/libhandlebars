@@ -58,6 +58,25 @@ typedef struct Handlebars {
     HbVector* components;
 } Handlebars;
 
+typedef struct HbString {
+    char* string;
+    size_t length;
+    size_t capacity;
+} HbString;
+
+// Initialize a string
+HbString* hb_string_init();
+
+// Create a string from a C-style string (requires a copy)
+HbString* hb_string_from_str(const char* string);
+
+// Append two strings
+int hb_string_append(HbString* first, const HbString* second);
+int hb_string_append_str(HbString* first, const char* second);
+
+// Free all memory associated with a string
+void hb_string_free(HbString** string);
+
 // Create an input context from the file with the given path
 HbInputContext* handlebars_input_context_from_file(const char* filename);
 
@@ -74,7 +93,7 @@ void handlebars_input_context_free(HbInputContext** input_context);
 Handlebars* handlebars_template_load(HbInputContext* input_context);
 
 // Render the template with the given context
-char* handlebars_render_template(Handlebars* template,
+HbString* handlebars_render_template(Handlebars* template,
     HbTemplateContext* context);
 
 // Free the template
@@ -87,6 +106,9 @@ void handlebars_template_context_free(HbTemplateContext** context);
 int handlebars_template_context_set_string(HbTemplateContext* context,
     const char* key, const char* value);
 
+// Get a string from the context
+const HbString* handlebars_template_context_get(HbTemplateContext* context,
+    HbString* key);
 // TODO: handlebars_template_context_set_object
 // TODO: handlebars_template_context_set_int
 

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/24/2021
+// LAST EDITED:     11/25/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <handlebars/string.h>
+#include <handlebars/handlebars.h>
 
 // Attempt to make it easy on myself by making the default size the size of a
 // cache line?
@@ -77,6 +77,7 @@ HbString* hb_string_init() {
         return NULL;
     }
     string->length = 0;
+    memset(string->string, 0, string->capacity);
     return string;
 }
 
@@ -93,6 +94,10 @@ HbString* hb_string_from_str(const char* content) {
     return string;
 }
 
+int hb_string_append(HbString* first, const HbString* second) {
+    return hb_string_append_str(first, second->string);
+}
+
 int hb_string_append_str(HbString* first, const char* second)
 {
     const size_t append_length = strlen(second);
@@ -103,7 +108,7 @@ int hb_string_append_str(HbString* first, const char* second)
         }
     }
 
-    strncpy(first->string, second, append_length + 1);
+    strncpy(first->string + first->length, second, append_length + 1);
     first->length = append_length + first->length;
     first->string[first->length] = '\0';
     return 0;

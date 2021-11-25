@@ -31,10 +31,10 @@
 ////
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include <handlebars/handlebars.h>
-#include <handlebars/string.h>
 #include <handlebars/vector.h>
 
 enum HbComponentType {
@@ -118,9 +118,35 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     return template;
 }
 
-char* handlebars_render_template(Handlebars* template,
+HbString* handlebars_render_template(Handlebars* template,
     HbTemplateContext* context)
-{ return NULL; }
+{
+    HbString* result = hb_string_init();
+    for (size_t i = 0; i < template->components->length; ++i) {
+        HbComponent* component = (HbComponent*)template->components->vector[i];
+        switch (component->type) {
+        case HB_TEXT:
+            if (0 != hb_string_append(result, component->string)) {
+                hb_string_free(&result);
+                return NULL;
+            }
+            break;
+        case HB_EXPRESSION:
+            const HbString* value = handlebars_template_context_get(context,
+                component->string);
+            if (NULL == value) {
+                break;
+            }
+            hb_string_append(result, value);
+            break;
+        default:
+            hb_string_free(&result);
+            assert(false);
+        }
+    }
+
+    return result;
+}
 
 void handlebars_template_free(Handlebars** template) {
     if (NULL != *template) {
