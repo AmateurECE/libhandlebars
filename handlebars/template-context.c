@@ -60,7 +60,7 @@ HbTemplateContext* handlebars_template_context_init() {
         return NULL;
     }
 
-    hb_vector_init(context->context);
+    context->context = hb_vector_init();
     if (NULL == context->context) {
         free(context);
         return NULL;
@@ -74,7 +74,7 @@ void handlebars_template_context_free(HbTemplateContext** context) {
         return;
     }
 
-    hb_vector_free((*context)->context, hb_priv_context_entry_free);
+    hb_vector_free(&(*context)->context, hb_priv_context_entry_free);
     free(*context);
     *context = NULL;
 }
@@ -82,6 +82,35 @@ void handlebars_template_context_free(HbTemplateContext** context) {
 // Set a string in the context
 int handlebars_template_context_set_string(HbTemplateContext* context,
     const char* key, const char* value)
-{ return 1; }
+{
+    HbContextEntry* entry = malloc(sizeof(HbContextEntry));
+    if (NULL == entry) {
+        return 1;
+    }
+
+    HbString* string_key = hb_string_from_str(key);
+    if (NULL == string_key) {
+        free(entry);
+        return 1;
+    }
+
+    HbString* string_value = hb_string_from_str(value);
+    if (NULL == string_key) {
+        free(entry);
+        hb_string_free(&string_key);
+        return 1;
+    }
+
+    entry->key = string_key;
+    entry->value = string_value;
+    if (0 != hb_vector_push_back(context->context, entry)) {
+        free(entry);
+        hb_string_free(&string_key);
+        hb_string_free(&string_value);
+        return 1;
+    }
+
+    return 0;
+}
 
 ///////////////////////////////////////////////////////////////////////////////

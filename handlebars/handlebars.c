@@ -109,12 +109,7 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
     context.handlebars = template;
-    template->components = malloc(sizeof(HbVector));
-    if (NULL == template->components) {
-        free(template);
-        return NULL;
-    }
-    hb_vector_init(template->components);
+    template->components = hb_vector_init();
 
     while (yyparse(&context));
 
