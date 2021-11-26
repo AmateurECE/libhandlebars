@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/25/2021
+# LAST EDITED:      11/26/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -52,6 +52,9 @@ libhandlebars = library(
   install: true,
   c_args: ['-Wall', '-Wextra', '-g', '-O0'],
 )
+
+pkgconfig = import('pkgconfig')
+pkgconfig.generate(libhandlebars, filebase: 'libhandlebars')
 
 executable(
   'testhandlebars',
