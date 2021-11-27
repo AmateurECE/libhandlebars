@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/26/2021
+# LAST EDITED:      11/27/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -59,6 +59,7 @@ pkgconfig.generate(libhandlebars, filebase: 'libhandlebars')
 executable(
   'testhandlebars',
   'test/main.c',
+  include_directories: ['handlebars'],
   link_with: [libhandlebars],
   c_args: ['-Wall', '-Wextra', '-g', '-O0'],
 )

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/25/2021
+// LAST EDITED:     11/27/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -73,7 +73,7 @@ static void hb_event(Handlebars* handlebars, enum HbComponentType type,
     component->string = string;
     component->type = type;
     hb_vector_push_back(handlebars->components, component);
-    printf("%d: \"%s\"\n", type, content);
+    /* printf("%d: \"%s\"\n", type, content); */
 }
 
 static void hb_priv_free_component(void* element_data) {
@@ -118,7 +118,7 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     return template;
 }
 
-HbString* handlebars_render_template(Handlebars* template,
+HbString* handlebars_template_render(Handlebars* template,
     HbTemplateContext* context)
 {
     HbString* result = hb_string_init();

@@ -8,7 +8,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/25/2021
+// LAST EDITED:     11/27/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -93,7 +93,7 @@ void handlebars_input_context_free(HbInputContext** input_context);
 Handlebars* handlebars_template_load(HbInputContext* input_context);
 
 // Render the template with the given context
-HbString* handlebars_render_template(Handlebars* template,
+HbString* handlebars_template_render(Handlebars* template,
     HbTemplateContext* context);
 
 // Free the template

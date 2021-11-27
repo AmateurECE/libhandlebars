@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/25/2021
+// LAST EDITED:     11/27/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -32,7 +32,7 @@
 
 #include <stdio.h>
 
-#include <handlebars/handlebars.h>
+#include <handlebars.h>
 
 static const char* template_text = "Some {{ test }}\n";
 
@@ -42,7 +42,7 @@ int main() {
     Handlebars* template = handlebars_template_load(input_context);
     HbTemplateContext* template_context = handlebars_template_context_init();
     handlebars_template_context_set_string(template_context, "test", "thing");
-    HbString* output = handlebars_render_template(template, template_context);
+    HbString* output = handlebars_template_render(template, template_context);
     if (NULL == output) {
         return 1;
     }
