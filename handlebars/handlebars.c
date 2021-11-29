@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/27/2021
+// LAST EDITED:     11/28/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -131,7 +131,7 @@ HbString* handlebars_template_render(Handlebars* template,
                 return NULL;
             }
             break;
-        case HB_EXPRESSION:
+        case HB_EXPRESSION: {
             const HbString* value = handlebars_template_context_get(context,
                 component->string);
             if (NULL == value) {
@@ -139,6 +139,7 @@ HbString* handlebars_template_render(Handlebars* template,
             }
             hb_string_append(result, value);
             break;
+        }
         default:
             hb_string_free(&result);
             assert(false);

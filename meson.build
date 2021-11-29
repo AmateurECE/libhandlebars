@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/27/2021
+# LAST EDITED:      11/28/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -61,7 +61,7 @@ executable(
   'test/main.c',
   include_directories: ['handlebars'],
   link_with: [libhandlebars],
-  c_args: ['-Wall', '-Wextra', '-g', '-O0'],
+  c_args: ['-Wall', '-Wextra', '-Os', '-std=c17'],
 )
 
 ###############################################################################
