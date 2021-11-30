@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/28/2021
+# LAST EDITED:      11/30/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -51,6 +51,7 @@ libhandlebars = library(
   sources: libhandlebars_sources,
   install: true,
   c_args: ['-Wall', '-Wextra', '-g', '-O0'],
+  version: meson.project_version(),
 )
 
 pkgconfig = import('pkgconfig')
