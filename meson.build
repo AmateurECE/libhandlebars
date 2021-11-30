@@ -30,7 +30,7 @@
 # IN THE SOFTWARE.
 ###
 
-project('libhandlebars', 'c', version: '0.1.3')
+project('libhandlebars', 'c', version: '0.1.4')
 
 run_command('peg', '-o', 'handlebars/parser.c', 'handlebars.peg', check: true)
 
