@@ -7,7 +7,7 @@
 //
 // CREATED:         11/21/2021
 //
-// LAST EDITED:     11/21/2021
+// LAST EDITED:     12/17/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -64,8 +64,7 @@ size_t hb_priv_read_string(void* data, char* buffer, size_t buffer_size)
 // Public API
 ////
 
-HbInputContext* handlebars_input_context_from_file(const char* filename)
-{ return NULL; }
+HbInputContext* handlebars_input_context_from_file(const char* filename);
 
 HbInputContext* handlebars_input_context_from_string(const char* string)
 {

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/28/2021
+// LAST EDITED:     12/17/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -56,7 +56,10 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 #define YY_INPUT(context, buffer, result, max_size)     \
     hb_priv_input(context, buffer, &result, max_size);
 #define YY_CTX_MEMBERS Handlebars* handlebars;
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #include "parser.c"
+#pragma GCC diagnostic pop
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API

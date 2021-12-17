@@ -7,7 +7,7 @@
 //
 // CREATED:         11/25/2021
 //
-// LAST EDITED:     11/25/2021
+// LAST EDITED:     12/17/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -88,6 +88,24 @@ int hb_vector_push_back(HbVector* vector, void* user_data) {
     }
 
     vector->vector[vector->length++] = user_data;
+    return 0;
+}
+
+int hb_vector_insert(HbVector* vector, size_t index, void* user_data) {
+    if (index > vector->length) {
+        return 1;
+    }
+
+    if (vector->length >= vector->capacity && hb_priv_vector_extend(vector,
+            vector->length + 1)) {
+        return 2;
+    }
+
+    for (size_t i = vector->length - 1; i > index; --i) {
+        vector->vector[i] = vector->vector[i - 1];
+    }
+
+    vector->vector[index] = user_data;
     return 0;
 }
 

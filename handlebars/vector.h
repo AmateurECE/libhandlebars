@@ -7,7 +7,7 @@
 //
 // CREATED:         11/25/2021
 //
-// LAST EDITED:     11/25/2021
+// LAST EDITED:     12/17/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -43,6 +43,7 @@ typedef struct HbVector {
 
 HbVector* hb_vector_init();
 int hb_vector_push_back(HbVector* vector, void* user_data);
+int hb_vector_insert(HbVector* vector, size_t index, void* user_data);
 void hb_vector_free(HbVector**, void (*free_data)(void*));
 
 #endif // HANDLEBARS_VECTOR_H

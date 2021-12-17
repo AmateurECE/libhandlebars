@@ -30,6 +30,7 @@
 // IN THE SOFTWARE.
 ////
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -37,7 +38,7 @@
 #include <handlebars/vector.h>
 
 typedef struct HbNaryNode {
-    int parent;
+    HbNaryNode* parent;
     void* user_data;
     void (*free)(void* user_data);
 } HbNaryNode;
@@ -47,7 +48,7 @@ typedef struct HbNaryTree {
 } HbNaryTree;
 
 typedef struct HbNaryNodeIterator {
-    int index;
+    size_t index;
     HbNaryTree* tree;
 } HbNaryNodeIterator;
 
@@ -95,10 +96,22 @@ HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data)) {
 
 int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
     HbNaryNode* child)
-{ return 1; }
+{
+    size_t index = 0;
+    for (index = tree->nodes->length - 1; index != SIZE_MAX; --index) {
+        HbNaryNode* node = tree->nodes->vector[index];
+        if (node->parent == parent) {
+            break;
+        }
+    }
 
-HbNaryNode* hb_nary_node_get_parent(HbNaryTree* tree, HbNaryNode* node)
-{ return tree->nodes->vector[node->parent]; }
+    hb_vector_insert(tree->nodes, index + 1, child);
+    child->parent = parent;
+    return 0;
+}
+
+HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node)
+{ return node->parent; }
 
 void hb_nary_node_free(HbNaryNode* node) {
     if (NULL != node->free) {
@@ -112,7 +125,12 @@ void hb_nary_node_iterator_init(HbNaryNodeIterator* iter, HbNaryTree* tree) {
     iter->tree = tree;
 }
 
-HbNaryNode* hb_nary_node_iterator_next(HbNaryNodeIterator* iter)
-{ return iter->tree->nodes->vector[iter->index++]; }
+HbNaryNode* hb_nary_node_iterator_next(HbNaryNodeIterator* iter) {
+    if (iter->index >= iter->tree->nodes->length) {
+        return NULL;
+    }
+
+    return iter->tree->nodes->vector[iter->index++];
+}
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -45,7 +45,7 @@ HbNaryNode* hb_nary_tree_get_root(HbNaryTree* tree);
 HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data));
 int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
     HbNaryNode* child);
-HbNaryNode* hb_nary_node_get_parent(HbNaryTree* tree, HbNaryNode* node);
+HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node);
 void hb_nary_node_free(HbNaryNode* node);
 
 void hb_nary_node_iterator_init(HbNaryNodeIterator* iter, HbNaryTree* tree);
