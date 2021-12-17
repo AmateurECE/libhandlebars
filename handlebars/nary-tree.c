@@ -30,12 +30,16 @@
 // IN THE SOFTWARE.
 ////
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <handlebars/nary-tree.h>
 #include <handlebars/vector.h>
 
 typedef struct HbNaryNode {
     int parent;
-    void* data;
+    void* user_data;
+    void (*free)(void* user_data);
 } HbNaryNode;
 
 typedef struct HbNaryTree {
@@ -47,8 +51,68 @@ typedef struct HbNaryNodeIterator {
     HbNaryTree* tree;
 } HbNaryNodeIterator;
 
+typedef void VectorFreeFn(void*);
+
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
 ////
+
+HbNaryTree* hb_nary_tree_new() {
+    HbNaryTree* tree = malloc(sizeof(HbNaryTree));
+    if (NULL == tree) {
+        return NULL;
+    }
+
+    memset(tree, 0, sizeof(HbNaryTree));
+    tree->nodes = hb_vector_init();
+    return tree;
+}
+
+void hb_nary_tree_free(HbNaryTree** tree) {
+    if (NULL == *tree) {
+        return;
+    }
+
+    hb_vector_free(&(*tree)->nodes, (VectorFreeFn*)hb_nary_node_free);
+    free(*tree);
+    *tree = NULL;
+}
+
+HbNaryNode* hb_nary_tree_get_root(HbNaryTree* tree)
+{ return tree->nodes->vector[tree->nodes->length - 1]; }
+
+HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data)) {
+    HbNaryNode* node = malloc(sizeof(HbNaryNode));
+    if (NULL == node) {
+        return NULL;
+    }
+
+    memset(node, 0, sizeof(HbNaryNode));
+    node->user_data = user_data;
+    node->free = free;
+    return node;
+}
+
+int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
+    HbNaryNode* child)
+{ return 1; }
+
+HbNaryNode* hb_nary_node_get_parent(HbNaryTree* tree, HbNaryNode* node)
+{ return tree->nodes->vector[node->parent]; }
+
+void hb_nary_node_free(HbNaryNode* node) {
+    if (NULL != node->free) {
+        node->free(node->user_data);
+    }
+    free(node);
+}
+
+void hb_nary_node_iterator_init(HbNaryNodeIterator* iter, HbNaryTree* tree) {
+    iter->index = 0;
+    iter->tree = tree;
+}
+
+HbNaryNode* hb_nary_node_iterator_next(HbNaryNodeIterator* iter)
+{ return iter->tree->nodes->vector[iter->index++]; }
 
 ///////////////////////////////////////////////////////////////////////////////
