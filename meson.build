@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      11/30/2021
+# LAST EDITED:      12/17/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -40,6 +40,7 @@ libhandlebars_sources = files([
   'handlebars/string.c',
   'handlebars/vector.c',
   'handlebars/template-context.c',
+  'handlebars/nary-tree.c',
 ])
 
 install_headers(
