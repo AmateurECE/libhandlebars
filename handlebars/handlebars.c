@@ -35,7 +35,13 @@
 #include <stdlib.h>
 
 #include <handlebars/handlebars.h>
-#include <handlebars/vector.h>
+#include <handlebars/nary-tree.h>
+
+typedef struct Handlebars {
+    HbInputContext* input_context;
+    HbNaryTree* components;
+    HbNaryNode* top;
+} Handlebars;
 
 enum HbComponentType {
     HB_TEXT,
@@ -65,6 +71,12 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 // Private API
 ////
 
+static void hb_priv_free_component(void* element_data) {
+    HbComponent* component = (HbComponent*)element_data;
+    hb_string_free(&component->string);
+    free(component);
+}
+
 static void hb_event(Handlebars* handlebars, enum HbComponentType type,
     const char* content)
 {
@@ -75,14 +87,9 @@ static void hb_event(Handlebars* handlebars, enum HbComponentType type,
 
     component->string = string;
     component->type = type;
-    hb_vector_push_back(handlebars->components, component);
+    HbNaryNode* node = hb_nary_node_new(component, hb_priv_free_component);
+    hb_nary_node_append_child(handlebars->components, handlebars->top, node);
     /* printf("%d: \"%s\"\n", type, content); */
-}
-
-static void hb_priv_free_component(void* element_data) {
-    HbComponent* component = (HbComponent*)element_data;
-    hb_string_free(&component->string);
-    free(component);
 }
 
 // Invoke the HbInputContext to fill the parser buffer
@@ -112,7 +119,10 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
     yycontext context;
     memset(&context, 0, sizeof(yycontext));
     context.handlebars = template;
-    template->components = hb_vector_init();
+    template->components = hb_nary_tree_new();
+    HbNaryNode* root = hb_nary_node_new(NULL, NULL);
+    hb_nary_node_append_child(template->components, NULL, root);
+    template->top = root;
 
     while (yyparse(&context));
 
@@ -125,8 +135,12 @@ HbString* handlebars_template_render(Handlebars* template,
     HbTemplateContext* context)
 {
     HbString* result = hb_string_init();
-    for (size_t i = 0; i < template->components->length; ++i) {
-        HbComponent* component = (HbComponent*)template->components->vector[i];
+    HbNaryNodeIter iterator;
+    hb_nary_node_iter_init(&iterator, template->components);
+    HbNaryNode* element = NULL;
+    HbComponent* component = NULL;
+    while (NULL != (element = hb_nary_node_iter_next(&iterator)) &&
+        NULL != (component = (HbComponent*)hb_nary_node_get_data(element))) {
         switch (component->type) {
         case HB_TEXT:
             if (0 != hb_string_append(result, component->string)) {
@@ -155,8 +169,7 @@ HbString* handlebars_template_render(Handlebars* template,
 void handlebars_template_free(Handlebars** template) {
     if (NULL != *template) {
         if (NULL != (*template)->components) {
-            hb_vector_free(&(*template)->components, hb_priv_free_component);
-            free((*template)->components);
+            hb_nary_tree_free(&(*template)->components);
         }
 
         free(*template);

@@ -8,7 +8,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     11/27/2021
+// LAST EDITED:     12/17/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -53,10 +53,7 @@ typedef struct HbTemplateContext {
 } HbTemplateContext;
 
 // Don't try to modify any of the members of this struct.
-typedef struct Handlebars {
-    HbInputContext* input_context;
-    HbVector* components;
-} Handlebars;
+typedef struct Handlebars Handlebars;
 
 typedef struct HbString {
     char* string;

@@ -36,7 +36,11 @@
 
 typedef struct HbNaryNode HbNaryNode;
 typedef struct HbNaryTree HbNaryTree;
-typedef struct HbNaryNodeIterator HbNaryNodeIterator;
+typedef struct HbNaryNodeIter {
+    size_t index;
+    HbNaryTree* tree;
+} HbNaryNodeIter;
+
 
 HbNaryTree* hb_nary_tree_new();
 void hb_nary_tree_free(HbNaryTree** tree);
@@ -47,9 +51,10 @@ int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
     HbNaryNode* child);
 HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node);
 void hb_nary_node_free(HbNaryNode* node);
+void* hb_nary_node_get_data(HbNaryNode* node);
 
-void hb_nary_node_iterator_init(HbNaryNodeIterator* iter, HbNaryTree* tree);
-HbNaryNode* hb_nary_node_iterator_next(HbNaryNodeIterator* iter);
+void hb_nary_node_iter_init(HbNaryNodeIter* iter, HbNaryTree* tree);
+HbNaryNode* hb_nary_node_iter_next(HbNaryNodeIter* iter);
 
 #endif // HANDLEBARS_NARY_TREE_H
 

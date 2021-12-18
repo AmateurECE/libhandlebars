@@ -47,11 +47,6 @@ typedef struct HbNaryTree {
     HbVector* nodes;
 } HbNaryTree;
 
-typedef struct HbNaryNodeIterator {
-    size_t index;
-    HbNaryTree* tree;
-} HbNaryNodeIterator;
-
 typedef void VectorFreeFn(void*);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,6 +92,11 @@ HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data)) {
 int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
     HbNaryNode* child)
 {
+    if (0 == tree->nodes->length) {
+        hb_vector_push_back(tree->nodes, child);
+        return 0;
+    }
+
     size_t index = 0;
     for (index = tree->nodes->length - 1; index != SIZE_MAX; --index) {
         HbNaryNode* node = tree->nodes->vector[index];
@@ -113,6 +113,9 @@ int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
 HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node)
 { return node->parent; }
 
+void* hb_nary_node_get_data(HbNaryNode* node)
+{ return node->user_data; }
+
 void hb_nary_node_free(HbNaryNode* node) {
     if (NULL != node->free) {
         node->free(node->user_data);
@@ -120,12 +123,12 @@ void hb_nary_node_free(HbNaryNode* node) {
     free(node);
 }
 
-void hb_nary_node_iterator_init(HbNaryNodeIterator* iter, HbNaryTree* tree) {
+void hb_nary_node_iter_init(HbNaryNodeIter* iter, HbNaryTree* tree) {
     iter->index = 0;
     iter->tree = tree;
 }
 
-HbNaryNode* hb_nary_node_iterator_next(HbNaryNodeIterator* iter) {
+HbNaryNode* hb_nary_node_iter_next(HbNaryNodeIter* iter) {
     if (iter->index >= iter->tree->nodes->length) {
         return NULL;
     }

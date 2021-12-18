@@ -101,11 +101,12 @@ int hb_vector_insert(HbVector* vector, size_t index, void* user_data) {
         return 2;
     }
 
-    for (size_t i = vector->length - 1; i > index; --i) {
+    for (size_t i = vector->length; i > index; --i) {
         vector->vector[i] = vector->vector[i - 1];
     }
 
     vector->vector[index] = user_data;
+    ++vector->length;
     return 0;
 }
 
