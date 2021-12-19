@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     12/17/2021
+// LAST EDITED:     12/18/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -36,6 +36,7 @@
 
 #include <handlebars/handlebars.h>
 #include <handlebars/nary-tree.h>
+#include <handlebars/vector.h>
 
 typedef struct Handlebars {
     HbInputContext* input_context;
@@ -43,17 +44,27 @@ typedef struct Handlebars {
     HbNaryNode* top;
 } Handlebars;
 
-enum HbComponentType {
+enum HbEventType {
     HB_TEXT,
+    HB_OPEN_BARS,
+    HB_CLOSE_BARS,
     HB_EXPRESSION,
+};
+
+enum HbComponentType {
+    HB_COMPONENT_TEXT,
+    HB_COMPONENT_EXPR,
 };
 
 typedef struct HbComponent {
     enum HbComponentType type;
-    HbString* string;
+    union {
+        HbString* string;
+        HbVector* arguments;
+    };
 } HbComponent;
 
-static void hb_event(Handlebars* handlebars, enum HbComponentType event,
+static void hb_event(Handlebars* handlebars, enum HbEventType event,
     const char* content);
 typedef struct _yycontext yycontext;
 static void hb_priv_input(yycontext* context, char* buffer, int* result,
@@ -66,6 +77,7 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 #pragma GCC diagnostic ignored "-Wunused-function"
 #include "parser.c"
 #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
@@ -73,23 +85,54 @@ static void hb_priv_input(yycontext* context, char* buffer, int* result,
 
 static void hb_priv_free_component(void* element_data) {
     HbComponent* component = (HbComponent*)element_data;
-    hb_string_free(&component->string);
+    if (HB_COMPONENT_TEXT == component->type) {
+        hb_string_free(&component->string);
+    }
+    else if (HB_COMPONENT_EXPR == component->type) {
+        for (size_t i = 0; i < component->arguments->length; ++i) {
+            hb_string_free((HbString**)&(component->arguments->vector[i]));
+        }
+        hb_vector_free(&component->arguments, NULL);
+    }
     free(component);
 }
 
-static void hb_event(Handlebars* handlebars, enum HbComponentType type,
+static void hb_event(Handlebars* handlebars, enum HbEventType event,
     const char* content)
 {
-    HbComponent* component = malloc(sizeof(HbComponent));
-    assert(NULL != component);
-    HbString* string = hb_string_from_str(content);
-    assert(NULL != string);
+    if (HB_TEXT == event) {
+        HbComponent* component = malloc(sizeof(HbComponent));
+        assert(NULL != component);
+        component->type = HB_COMPONENT_TEXT;
+        component->string = hb_string_from_str(content);
+        HbNaryNode* node = hb_nary_node_new(component, hb_priv_free_component);
+        hb_nary_node_append_child(handlebars->components, handlebars->top,
+            node);
+    } else if (HB_OPEN_BARS == event) {
+        HbComponent* component = malloc(sizeof(HbComponent));
+        assert(NULL != component);
+        component->type = HB_COMPONENT_EXPR;
+        component->arguments = hb_vector_init();
+        HbNaryNode* node = hb_nary_node_new(component, hb_priv_free_component);
+        hb_nary_node_append_child(handlebars->components, handlebars->top,
+            node);
+        handlebars->top = node;
+    } else if (HB_CLOSE_BARS == event) {
+        handlebars->top = hb_nary_node_get_parent(handlebars->top);
+    } else if (HB_EXPRESSION == event) {
+        HbComponent* component = (HbComponent*)hb_nary_node_get_data(
+            handlebars->top);
+        HbString* argument = hb_string_from_str(content);
+        hb_vector_push_back(component->arguments, argument);
+    } else {
+        assert(0); // Programmer's error.
+    }
 
-    component->string = string;
-    component->type = type;
-    HbNaryNode* node = hb_nary_node_new(component, hb_priv_free_component);
-    hb_nary_node_append_child(handlebars->components, handlebars->top, node);
-    /* printf("%d: \"%s\"\n", type, content); */
+    if (HB_OPEN_BARS != event && HB_CLOSE_BARS != event) {
+        printf("%d: \"%s\"\n", event, content);
+    } else {
+        printf("%d\n", event);
+    }
 }
 
 // Invoke the HbInputContext to fill the parser buffer
@@ -142,13 +185,13 @@ HbString* handlebars_template_render(Handlebars* template,
     while (NULL != (element = hb_nary_node_iter_next(&iterator)) &&
         NULL != (component = (HbComponent*)hb_nary_node_get_data(element))) {
         switch (component->type) {
-        case HB_TEXT:
+        case HB_COMPONENT_TEXT:
             if (0 != hb_string_append(result, component->string)) {
                 hb_string_free(&result);
                 return NULL;
             }
             break;
-        case HB_EXPRESSION: {
+        case HB_COMPONENT_EXPR: {
             const HbString* value = handlebars_template_context_get(context,
                 component->string);
             if (NULL == value) {

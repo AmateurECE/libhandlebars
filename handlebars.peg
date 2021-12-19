@@ -1,7 +1,10 @@
 
-expression <- "{{" ws* < handlebars* > ws* "}}" {
-            hb_event(yy->handlebars, HB_EXPRESSION, yytext); }
+handlebars <- open_bars expression+ close_bars
         / < not_handlebars+ > { hb_event(yy->handlebars, HB_TEXT, yytext); }
-not_handlebars <- !"{{" .
-handlebars <- !"}}" !ws .
+not_handlebars <- !open_bars .
+expression <- ws* < hbtoken+ > ws* { hb_event(yy->handlebars, HB_EXPRESSION,
+            yytext); }
+hbtoken <- !close_bars !ws .
 ws <- [ \t\n]
+open_bars <- "{{" { hb_event(yy->handlebars, HB_OPEN_BARS, NULL); }
+close_bars <- "}}"  { hb_event(yy->handlebars, HB_CLOSE_BARS, NULL); }
