@@ -128,11 +128,11 @@ static void hb_event(Handlebars* handlebars, enum HbEventType event,
         assert(0); // Programmer's error.
     }
 
-    if (HB_OPEN_BARS != event && HB_CLOSE_BARS != event) {
-        printf("%d: \"%s\"\n", event, content);
-    } else {
-        printf("%d\n", event);
-    }
+    /* if (HB_OPEN_BARS != event && HB_CLOSE_BARS != event) { */
+    /*     printf("%d: \"%s\"\n", event, content); */
+    /* } else { */
+    /*     printf("%d\n", event); */
+    /* } */
 }
 
 // Invoke the HbInputContext to fill the parser buffer
@@ -192,12 +192,15 @@ HbString* handlebars_template_render(Handlebars* template,
             }
             break;
         case HB_COMPONENT_EXPR: {
-            const HbString* value = handlebars_template_context_get(context,
-                component->string);
-            if (NULL == value) {
-                break;
+            // Simple expression: Just substitute from context.
+            if (1 == component->arguments->length) {
+                const HbString* value = handlebars_template_context_get(
+                    context, (HbString*)component->arguments->vector[0]);
+                if (NULL == value) {
+                    break;
+                }
+                hb_string_append(result, value);
             }
-            hb_string_append(result, value);
             break;
         }
         default:
