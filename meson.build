@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      12/17/2021
+# LAST EDITED:      12/28/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -32,8 +32,6 @@
 
 project('libhandlebars', 'c', version: '0.1.4')
 
-run_command('peg', '-o', 'handlebars/parser.c', 'handlebars.peg', check: true)
-
 libhandlebars_sources = files([
   'handlebars/handlebars.c',
   'handlebars/input-context.c',
@@ -41,6 +39,8 @@ libhandlebars_sources = files([
   'handlebars/vector.c',
   'handlebars/template-context.c',
   'handlebars/nary-tree.c',
+  'handlebars/parser.c',
+  'handlebars/scanner.c',
 ])
 
 install_headers(

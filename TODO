@@ -1,0 +1,5 @@
+* Rename handlebars_* functions to be hb_*.
+* Add a *_set_strings convenience method to make code that has to add a lot of
+  context?
+* Finish writing handwritten parser.
+* Doxygen docs.
