@@ -42,6 +42,8 @@ int main() {
     RUN_TEST(test_HbScanner_Basic);
     RUN_TEST(test_HbScanner_Token);
     RUN_TEST(test_HbScanner_Whitespace);
+    RUN_TEST(test_HbScanner_Eof);
+    RUN_TEST(test_HbScanner_DoubleWhitespace);
     return UNITY_END();
 }
 

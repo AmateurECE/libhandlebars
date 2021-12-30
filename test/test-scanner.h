@@ -36,6 +36,8 @@
 void test_HbScanner_Basic();
 void test_HbScanner_Token();
 void test_HbScanner_Whitespace();
+void test_HbScanner_Eof();
+void test_HbScanner_DoubleWhitespace();
 
 #endif // HANDLEBARS_TEST_SCANNER_H
 
