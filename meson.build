@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      12/29/2021
+# LAST EDITED:      12/30/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -41,6 +41,7 @@ libhandlebars_sources = files([
   'handlebars/nary-tree.c',
   'handlebars/parser.c',
   'handlebars/scanner.c',
+  'handlebars/scanner/token-buffer.c',
 ])
 
 install_headers(

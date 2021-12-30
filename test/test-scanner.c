@@ -97,4 +97,19 @@ void test_HbScanner_Token() {
     scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
 }
 
+static const char* WHITESPACE_TEST = "Text {{ whitespace }}.";
+void test_HbScanner_Whitespace() {
+    scanner_token_verification_setup(WHITESPACE_TEST);
+    scanner_token_compare(HB_TOKEN_TEXT, "Text ", 1, 0);
+    scanner_token_compare(HB_TOKEN_OPEN_BARS, NULL, 1, 5);
+    hb_scanner_enable_ws_token(scanner);
+    scanner_token_compare(HB_TOKEN_WS, " ", 1, 7);
+    scanner_token_compare(HB_TOKEN_TEXT, "whitespace", 1, 8);
+    scanner_token_compare(HB_TOKEN_WS, " ", 1, 18);
+    hb_scanner_disable_ws_token(scanner);
+    scanner_token_compare(HB_TOKEN_CLOSE_BARS, NULL, 1, 19);
+    scanner_token_compare(HB_TOKEN_TEXT, ".", 1, 21);
+    scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
+}
+
 ///////////////////////////////////////////////////////////////////////////////

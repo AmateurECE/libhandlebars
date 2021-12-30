@@ -38,23 +38,39 @@
 
 #include <handlebars/handlebars.h>
 #include <handlebars/scanner.h>
+#include <handlebars/scanner/token-buffer.h>
 
-static const size_t BUFFER_SIZE = 4096;
+static const size_t CHAR_BUFFER_SIZE = 4096;
+static const size_t TOKEN_BUFFER_SIZE = 8;
 
 typedef struct HbScanner {
+    // If this flag is true, the scanner treats whitespace as a separate token
+    // and generates HB_TOKEN_WS instances. Otherwise, all whitespace is
+    // considered to be part of a HB_TOKEN_TEXT token.
     bool ws_enabled;
+
+    // Provides input stream from any source.
     HbInputContext* input_context;
-    HbParseToken* token_cache;
+
+    // TODO: Following could probably be abstracted into a 'CharStream' or some
+    //  such abstraction.
+
+    // Buffers related to stream lexing. We can't necessarily count on the
+    // stream underlying <input_context> to be buffered, so do it here.
     char* buffer;
     size_t buffer_index;
     size_t buffer_level;
 
+    // Keep track of the line and column of the cursor
     int line_count;
     int column_count;
+
+    // Output stream for the tokens.
+    TokenBuffer token_buffer;
 } HbScanner;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Private API
+// HbScanner Private API
 ////
 
 // "Move" the data from <source> to <dest>, destroying <source>.
@@ -100,8 +116,8 @@ static inline void priv_init_ws_token(HbParseToken* token,
 {
     token->type = HB_TOKEN_WS;
     token->line = scanner->line_count;
-    token->column = scanner->column_count;
-    token->string = NULL;
+    token->column = scanner->column_count - 1;
+    token->string = hb_string_init();
 }
 
 static inline void priv_init_eof_token(HbParseToken* token)
@@ -112,7 +128,8 @@ static inline void priv_init_eof_token(HbParseToken* token)
 static char priv_next_char(HbScanner* scanner) {
     if (scanner->buffer_index >= scanner->buffer_level) {
         scanner->buffer_level = scanner->input_context->read(
-            scanner->input_context->data, scanner->buffer, BUFFER_SIZE - 1);
+            scanner->input_context->data, scanner->buffer,
+            CHAR_BUFFER_SIZE - 1);
         scanner->buffer_index = 0;
         scanner->buffer[scanner->buffer_level] = '\0';
     }
@@ -131,14 +148,14 @@ static char priv_next_char(HbScanner* scanner) {
 // Handle the case of HB_TOKEN_WS. If <current> is a whitespace character, and
 // whitespace token emission is enabled, generate a whitespace token and
 // indicate to the caller that a token was generated (by returning 1).
-static int priv_check_for_ws_token(HbScanner* scanner, char current,
-    HbParseToken* token)
-{
+static int priv_check_for_ws_token(HbScanner* scanner, char current) {
     int result = 0;
     if (isspace(current) && scanner->ws_enabled) {
-        priv_move_token(token, scanner->token_cache);
+        HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
+        priv_init_ws_token(token, scanner);
+        char fragment[] = {current, '\0'};
+        hb_string_append_str(token->string, fragment);
         result = 1;
-        // TODO
     }
 
     return result;
@@ -148,9 +165,7 @@ static int priv_check_for_ws_token(HbScanner* scanner, char current,
 // another character from the stream, which ends up making token emission a
 // little more complicated here. If we encountered a *_BARS token in the
 // stream, signal this to the caller by returning 1.
-static int priv_check_for_handlebars_token(HbScanner* scanner, char current,
-    HbParseToken* token)
-{
+static int priv_check_for_handlebars_token(HbScanner* scanner, char current) {
     if ('{' != current && '}' != current) {
         return 0;
     }
@@ -158,16 +173,18 @@ static int priv_check_for_handlebars_token(HbScanner* scanner, char current,
     int result = 0;
     char next = priv_next_char(scanner);
     if (current == next) {
-        priv_move_token(token, scanner->token_cache);
-        '{' == next ? priv_init_open_bars_token(scanner->token_cache, scanner)
-            : priv_init_close_bars_token(scanner->token_cache, scanner);
         result = 1;
-    } else if (priv_check_for_ws_token(scanner, next, token)) {
+        HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
+        switch (next) {
+        case '{': priv_init_open_bars_token(token, scanner); break;
+        case '}': priv_init_close_bars_token(token, scanner); break;
+        default: assert(0); // Programmer's error.
+        }
+    } else if (priv_check_for_ws_token(scanner, next)) {
         result = 1;
     } else if ('\0' == next) {
-        priv_move_token(token, scanner->token_cache);
-        priv_init_eof_token(scanner->token_cache);
         result = 1;
+        priv_init_eof_token(token_buffer_reserve(&scanner->token_buffer));
     }
 
     return result;
@@ -187,20 +204,14 @@ HbScanner* hb_scanner_new(HbInputContext* input_context) {
     memset(scanner, 0, sizeof(HbScanner));
     scanner->input_context = input_context;
     scanner->line_count = 1;
-    scanner->token_cache = malloc(sizeof(HbParseToken));
-    if (NULL == scanner->token_cache) {
-        free(scanner);
-        return NULL;
-    }
-    memset(scanner->token_cache, 0, sizeof(HbParseToken));
-
-    scanner->buffer = malloc(BUFFER_SIZE);
+    token_buffer_init(&scanner->token_buffer, TOKEN_BUFFER_SIZE);
+    scanner->buffer = malloc(CHAR_BUFFER_SIZE);
     if (NULL == scanner->buffer) {
-        free(scanner->token_cache);
+        token_buffer_release(&scanner->token_buffer);
         free(scanner);
         return NULL;
     }
-    memset(scanner->buffer, 0, BUFFER_SIZE);
+    memset(scanner->buffer, 0, CHAR_BUFFER_SIZE);
 
     return scanner;
 }
@@ -208,7 +219,7 @@ HbScanner* hb_scanner_new(HbInputContext* input_context) {
 // Free internal memory assocaited with the scanner.
 void hb_scanner_free(HbScanner* scanner) {
     free(scanner->buffer);
-    free(scanner->token_cache);
+    token_buffer_release(&scanner->token_buffer);
     handlebars_input_context_free(&scanner->input_context);
     free(scanner);
 }
@@ -229,39 +240,42 @@ void hb_scanner_enable_ws_token(HbScanner* scanner)
 // Token table:
 int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token) {
     int result = 0;
-    if (HB_TOKEN_NULL != scanner->token_cache->type) {
-        priv_move_token(token, scanner->token_cache);
+    if (0 < scanner->token_buffer.length) {
+        HbParseToken* next = token_buffer_dequeue(&scanner->token_buffer);
+        priv_move_token(token, next);
         return 1;
     }
 
     char current = 0;
+    HbParseToken* text_token = NULL;
     while ('\0' != (current = priv_next_char(scanner))) {
         // If matching "{{" or "}}" or whitespace (if enabled)
-        if (priv_check_for_handlebars_token(scanner, current, token) ||
-            priv_check_for_ws_token(scanner, current, token)) {
-            result = 1;
+        if (priv_check_for_handlebars_token(scanner, current) ||
+            priv_check_for_ws_token(scanner, current)) {
             break;
         }
 
         else {
-            if (HB_TOKEN_TEXT != scanner->token_cache->type) {
-                priv_init_text_token(scanner->token_cache, scanner);
-                result = 1;
+            if (NULL == text_token) {
+                text_token = token_buffer_reserve(&scanner->token_buffer);
+                priv_init_text_token(text_token, scanner);
             }
 
             char fragment[] = {current, '\0'};
-            hb_string_append_str(scanner->token_cache->string, fragment);
+            hb_string_append_str(text_token->string, fragment);
         }
-    }
-
-    // Make sure that we're returning a token
-    if (HB_TOKEN_NULL == token->type) {
-        priv_move_token(token, scanner->token_cache);
     }
 
     // Handle EOF condition:
     if ('\0' == current) {
-        priv_init_eof_token(scanner->token_cache);
+        HbParseToken* eof_token = token_buffer_reserve(&scanner->token_buffer);
+        priv_init_eof_token(eof_token);
+    }
+
+    if (0 < scanner->token_buffer.length) {
+        HbParseToken* next = token_buffer_dequeue(&scanner->token_buffer);
+        priv_move_token(token, next);
+        result = 1;
     }
 
     return result;
@@ -288,7 +302,7 @@ const char* hb_token_to_string(HbParseTokenType type) {
 // Release internal memory held by <token>. This allows the caller to manage
 // the memory of <token> itself.
 void hb_token_release(HbParseToken* token) {
-    if (HB_TOKEN_TEXT == token->type) {
+    if (HB_TOKEN_TEXT == token->type || HB_TOKEN_WS == token->type) {
         hb_string_free(&token->string);
     }
 

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     12/29/2021
+// LAST EDITED:     12/30/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -41,6 +41,7 @@ int main() {
     UNITY_BEGIN();
     RUN_TEST(test_HbScanner_Basic);
     RUN_TEST(test_HbScanner_Token);
+    RUN_TEST(test_HbScanner_Whitespace);
     return UNITY_END();
 }
 
