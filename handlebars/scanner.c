@@ -48,17 +48,33 @@ typedef struct HbScanner {
     char* buffer;
     size_t buffer_index;
     size_t buffer_level;
+
+    int line_count;
+    int column_count;
 } HbScanner;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
 ////
 
-static void priv_transfer_token(HbParseToken* dest, HbParseToken* source) {
+static void priv_move_token(HbParseToken* dest, HbParseToken* source) {
     dest->type = source->type;
     dest->string = source->string;
+    dest->line = source->line;
+    dest->column = source->column;
     source->type = HB_TOKEN_NULL;
     source->string = NULL;
+}
+
+static void priv_init_token(HbParseToken* token, HbParseTokenType type,
+    HbScanner* scanner)
+{
+    token->type = type;
+    token->line = scanner->line_count;
+    token->column = scanner->column_count;
+    if (HB_TOKEN_TEXT == type) {
+        token->string = hb_string_init();
+    }
 }
 
 static char priv_next_char(HbScanner* scanner) {
@@ -69,20 +85,24 @@ static char priv_next_char(HbScanner* scanner) {
         scanner->buffer[scanner->buffer_level] = '\0';
     }
 
-    return scanner->buffer[scanner->buffer_index++];
+    char result = scanner->buffer[scanner->buffer_index++];
+    if ('\n' == result) {
+        scanner->line_count += 1;
+        scanner->column_count = -1;
+    } else {
+        scanner->column_count += 1;
+    }
+
+    return result;
 }
 
 static int priv_ws_token(HbScanner* scanner, char current,
     HbParseToken* token)
 {
     int result = 0;
-    if ('\n' == current) {
-        priv_transfer_token(token, scanner->token_cache);
-        scanner->token_cache->type = HB_TOKEN_EOL;
+    if (isspace(current) && scanner->ws_enabled) {
+        priv_move_token(token, scanner->token_cache);
         result = 1;
-    } else
-
-    if (scanner->ws_enabled) {
         // TODO
     }
 
@@ -99,15 +119,15 @@ static int priv_handlebars_token(HbScanner* scanner, char current,
     int result = 0;
     char next = priv_next_char(scanner);
     if (current == next) {
-        priv_transfer_token(token, scanner->token_cache);
-        scanner->token_cache->type = '{' == next ? HB_TOKEN_OPEN_BARS
-            : HB_TOKEN_CLOSE_BARS;
+        priv_move_token(token, scanner->token_cache);
+        priv_init_token(scanner->token_cache, '{' == next ? HB_TOKEN_OPEN_BARS
+            : HB_TOKEN_CLOSE_BARS, scanner);
         result = 1;
     } else if (priv_ws_token(scanner, next, token)) {
         result = 1;
     } else if ('\0' == next) {
-        priv_transfer_token(token, scanner->token_cache);
-        scanner->token_cache->type = HB_TOKEN_EOF;
+        priv_move_token(token, scanner->token_cache);
+        priv_init_token(scanner->token_cache, HB_TOKEN_EOF, scanner);
         result = 1;
     }
 
@@ -127,6 +147,8 @@ HbScanner* hb_scanner_new(HbInputContext* input_context) {
 
     memset(scanner, 0, sizeof(HbScanner));
     scanner->input_context = input_context;
+    scanner->line_count = 1;
+    scanner->column_count = -1;
     scanner->token_cache = malloc(sizeof(HbParseToken));
     if (NULL == scanner->token_cache) {
         free(scanner);
@@ -170,7 +192,7 @@ void hb_scanner_enable_ws_token(HbScanner* scanner)
 int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token) {
     int result = 0;
     if (HB_TOKEN_NULL != scanner->token_cache->type) {
-        priv_transfer_token(token, scanner->token_cache);
+        priv_move_token(token, scanner->token_cache);
         return 1;
     }
 
@@ -185,8 +207,7 @@ int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token) {
 
         else {
             if (HB_TOKEN_TEXT != token->type) {
-                token->type = HB_TOKEN_TEXT;
-                token->string = hb_string_init();
+                priv_init_token(token, HB_TOKEN_TEXT, scanner);
                 result = 1;
             }
 
@@ -197,7 +218,7 @@ int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token) {
 
     // Handle EOF condition:
     if ('\0' == current) {
-        scanner->token_cache->type = HB_TOKEN_EOF;
+        priv_init_token(scanner->token_cache, HB_TOKEN_EOF, scanner);
     }
 
     return result;
@@ -214,8 +235,6 @@ const char* hb_token_to_string(HbParseTokenType type) {
         return "HB_TOKEN_TEXT";
     case HB_TOKEN_WS:
         return "HB_TOKEN_WS";
-    case HB_TOKEN_EOL:
-        return "HB_TOKEN_EOL";
     case HB_TOKEN_EOF:
         return "HB_TOKEN_EOF";
     default:

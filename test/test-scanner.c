@@ -30,29 +30,45 @@
 // IN THE SOFTWARE.
 ////
 
+#include <string.h>
+
 #include <unity.h>
 
 #include <handlebars/handlebars.h>
 #include <handlebars/scanner.h>
 #include "test-scanner.h"
 
-void setUp() {}
-void tearDown() {}
+static HbInputContext* input_context;
+static HbScanner* scanner;
+static HbParseToken token;
+
+void setUp() {
+    input_context = NULL;
+    scanner = NULL;
+    memset(&token, 0, sizeof(HbParseToken));
+}
+
+void tearDown() {
+    hb_scanner_free(scanner);
+}
+
+void scanner_token_verification_setup(const char* test_string) {
+    input_context = handlebars_input_context_from_string(test_string);
+    scanner = hb_scanner_new(input_context);
+}
 
 static const char* BASIC_TEST = "The quick brown fox jumped over the lazy dog";
 void test_HbScanner_Basic() {
-    HbInputContext* input_context = handlebars_input_context_from_string(
-        BASIC_TEST);
-    HbScanner* scanner = hb_scanner_new(input_context);
-    HbParseToken token = {0};
+    scanner_token_verification_setup(BASIC_TEST);
     TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
     TEST_ASSERT_EQUAL_INT(HB_TOKEN_TEXT, token.type);
     TEST_ASSERT_EQUAL_STRING(BASIC_TEST, token.string->string);
+    TEST_ASSERT_EQUAL_INT(1, token.line);
+    TEST_ASSERT_EQUAL_INT(0, token.column);
 
     hb_token_release(&token);
     TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
     TEST_ASSERT_EQUAL_INT(HB_TOKEN_EOF, token.type);
-    hb_scanner_free(scanner);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

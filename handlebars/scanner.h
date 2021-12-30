@@ -57,14 +57,18 @@ typedef enum HbParseTokenType {
     HB_TOKEN_WS,            // [ \t\n]*
 
     HB_TOKEN_EOF, // End of file (or stream)
-
-    // End of line (always generated, regardless of ws enable/disable state).
-    HB_TOKEN_EOL,
 } HbParseTokenType;
 
 // Structure of a token event.
 typedef struct HbParseToken {
-    HbParseTokenType type;
+    HbParseTokenType type;      // Type of the token
+
+    // The line number and column number in the input that marks the start of
+    // the token.
+    int line;
+    int column;
+
+    // String representing
     HbString* string;
 } HbParseToken;
 
