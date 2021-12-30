@@ -149,16 +149,19 @@ static char priv_next_char(HbScanner* scanner) {
 // whitespace token emission is enabled, generate a whitespace token and
 // indicate to the caller that a token was generated (by returning 1).
 static int priv_check_for_ws_token(HbScanner* scanner, char current) {
-    int result = 0;
-    if (isspace(current) && scanner->ws_enabled) {
-        HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
-        priv_init_ws_token(token, scanner);
-        char fragment[] = {current, '\0'};
-        hb_string_append_str(token->string, fragment);
-        result = 1;
+    if (!isspace(current) || !scanner->ws_enabled) {
+        return 0;
     }
 
-    return result;
+    HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
+    priv_init_ws_token(token, scanner);
+    while (isspace(current)) {
+        char fragment[] = {current, '\0'};
+        hb_string_append_str(token->string, fragment);
+        current = priv_next_char(scanner);
+    }
+
+    return 1;
 }
 
 // Handle the case where this character is '{' or '}'. We have to consume
