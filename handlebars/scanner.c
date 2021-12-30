@@ -187,10 +187,17 @@ int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token) {
             if (HB_TOKEN_TEXT != token->type) {
                 token->type = HB_TOKEN_TEXT;
                 token->string = hb_string_init();
+                result = 1;
             }
 
-            hb_string_append_str(token->string, &current);
+            char fragment[] = {current, '\0'};
+            hb_string_append_str(token->string, fragment);
         }
+    }
+
+    // Handle EOF condition:
+    if ('\0' == current) {
+        scanner->token_cache->type = HB_TOKEN_EOF;
     }
 
     return result;

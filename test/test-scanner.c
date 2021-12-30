@@ -48,6 +48,10 @@ void test_HbScanner_Basic() {
     TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
     TEST_ASSERT_EQUAL_INT(HB_TOKEN_TEXT, token.type);
     TEST_ASSERT_EQUAL_STRING(BASIC_TEST, token.string->string);
+
+    hb_string_free(&token.string);
+    TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
+    TEST_ASSERT_EQUAL_INT(HB_TOKEN_EOF, token.type);
     hb_scanner_free(scanner);
 }
 
