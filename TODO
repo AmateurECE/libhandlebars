@@ -3,3 +3,5 @@
   context?
 * Finish writing handwritten parser.
 * Doxygen docs.
+* Refactor all "free()" functions to be congruent with free(3) signature.
+* Fix symbol exports

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            main.c
+// NAME:            test-scanner.c
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Entrypoint for test application.
+// DESCRIPTION:     Unit tests for the HbScanner.
 //
-// CREATED:         11/20/2021
+// CREATED:         12/29/2021
 //
 // LAST EDITED:     12/29/2021
 //
@@ -30,17 +30,25 @@
 // IN THE SOFTWARE.
 ////
 
-#include <stdio.h>
-
-#include <handlebars.h>
 #include <unity.h>
 
+#include <handlebars/handlebars.h>
+#include <handlebars/scanner.h>
 #include "test-scanner.h"
 
-int main() {
-    UNITY_BEGIN();
-    RUN_TEST(test_HbScanner_Basic);
-    return UNITY_END();
+void setUp() {}
+void tearDown() {}
+
+static const char* BASIC_TEST = "The quick brown fox jumped over the lazy dog";
+void test_HbScanner_Basic() {
+    HbInputContext* input_context = handlebars_input_context_from_string(
+        BASIC_TEST);
+    HbScanner* scanner = hb_scanner_new(input_context);
+    HbParseToken token = {0};
+    TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
+    TEST_ASSERT_EQUAL_INT(HB_TOKEN_TEXT, token.type);
+    TEST_ASSERT_EQUAL_STRING(BASIC_TEST, token.string->string);
+    hb_scanner_free(scanner);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

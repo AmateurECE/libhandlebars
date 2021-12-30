@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            main.c
+// NAME:            test-scanner.h
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Entrypoint for test application.
+// DESCRIPTION:     Tests for the HbScanner
 //
-// CREATED:         11/20/2021
+// CREATED:         12/29/2021
 //
 // LAST EDITED:     12/29/2021
 //
@@ -30,17 +30,11 @@
 // IN THE SOFTWARE.
 ////
 
-#include <stdio.h>
+#ifndef HANDLEBARS_TEST_SCANNER_H
+#define HANDLEBARS_TEST_SCANNER_H
 
-#include <handlebars.h>
-#include <unity.h>
+void test_HbScanner_Basic();
 
-#include "test-scanner.h"
-
-int main() {
-    UNITY_BEGIN();
-    RUN_TEST(test_HbScanner_Basic);
-    return UNITY_END();
-}
+#endif // HANDLEBARS_TEST_SCANNER_H
 
 ///////////////////////////////////////////////////////////////////////////////

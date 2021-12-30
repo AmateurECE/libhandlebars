@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      12/28/2021
+# LAST EDITED:      12/29/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -58,11 +58,17 @@ libhandlebars = library(
 pkgconfig = import('pkgconfig')
 pkgconfig.generate(libhandlebars, filebase: 'libhandlebars')
 
+unity = dependency('unity', modules: ['unity::framework'])
+
 executable(
   'testhandlebars',
-  'test/main.c',
+  sources: files([
+    'test/main.c',
+    'test/test-scanner.c',
+  ]),
   include_directories: ['handlebars'],
   link_with: [libhandlebars],
+  dependencies: [unity],
   c_args: ['-Wall', '-Wextra', '-Os', '-std=c17'],
 )
 

@@ -38,9 +38,11 @@ typedef struct HbScanner HbScanner;
 
 // Forward declarations.
 typedef struct HbInputContext HbInputContext;
+typedef struct HbString HbString;
 
 // Valid parser tokens.
 typedef enum HbParseTokenType {
+    HB_TOKEN_NULL,          // '\0', or a named constant to signal no token
     HB_TOKEN_OPEN_BARS,     // "{{"
     HB_TOKEN_CLOSE_BARS,    // "}}"
 
@@ -53,12 +55,17 @@ typedef enum HbParseTokenType {
     // internal boolean, which can be enabled or disabled with the *_ws_token
     // functions. See their description for more info.
     HB_TOKEN_WS,            // [ \t\n]*
+
+    HB_TOKEN_EOF, // End of file (or stream)
+
+    // End of line (always generated, regardless of ws enable/disable state).
+    HB_TOKEN_EOL,
 } HbParseTokenType;
 
 // Structure of a token event.
 typedef struct HbParseToken {
     HbParseTokenType type;
-    char* string;
+    HbString* string;
 } HbParseToken;
 
 // Create a new HbScanner.
@@ -73,11 +80,15 @@ HbScanner* hb_scanner_new(HbInputContext* input_context);
 void hb_scanner_disable_ws_token(HbScanner* scanner);
 void hb_scanner_enable_ws_token(HbScanner* scanner);
 
-// Return the next scanner from the stream.
+// Populate <token> with the next token from the stream. Return the number of
+// tokens processed (i.e. 1 for a successful scan).
 int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token);
 
 // Free internal memory assocaited with the scanner.
 void hb_scanner_free(HbScanner* scanner);
+
+// Return a string describing the Parser token type (for debugging purposes)
+const char* hb_token_to_string(HbParseTokenType type);
 
 #endif // HANDLEBARS_SCANNER_H
 
