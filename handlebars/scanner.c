@@ -57,17 +57,19 @@ typedef struct HbScanner {
 // Private API
 ////
 
+// "Move" the data from <source> to <dest>, destroying <source>.
 static void priv_move_token(HbParseToken* dest, HbParseToken* source) {
     dest->type = source->type;
     dest->string = source->string;
     dest->line = source->line;
     dest->column = source->column;
-    source->type = HB_TOKEN_NULL;
-    source->string = NULL;
+    memset(source, 0, sizeof(HbParseToken));
 }
 
+// Initialize a token of the given type, borrowing some context from the
+// scanner.
 static void priv_init_token(HbParseToken* token, HbParseTokenType type,
-    HbScanner* scanner)
+    const HbScanner* scanner)
 {
     token->type = type;
     token->line = scanner->line_count;
@@ -77,6 +79,8 @@ static void priv_init_token(HbParseToken* token, HbParseTokenType type,
     }
 }
 
+// Obtain the next char from the buffered stream, which could result in reading
+// more data from the stream.
 static char priv_next_char(HbScanner* scanner) {
     if (scanner->buffer_index >= scanner->buffer_level) {
         scanner->buffer_level = scanner->input_context->read(
@@ -96,6 +100,9 @@ static char priv_next_char(HbScanner* scanner) {
     return result;
 }
 
+// Handle the case of HB_TOKEN_WS. If <current> is a whitespace character, and
+// whitespace token emission is enabled, generate a whitespace token and
+// indicate to the caller that a token was generated (by returning 1).
 static int priv_ws_token(HbScanner* scanner, char current,
     HbParseToken* token)
 {
@@ -109,6 +116,10 @@ static int priv_ws_token(HbScanner* scanner, char current,
     return result;
 }
 
+// Handle the case where this character is '{' or '}'. We have to consume
+// another character from the stream, which ends up making token emission a
+// little more complicated here. If we encountered a *_BARS token in the
+// stream, signal this to the caller by returning 1.
 static int priv_handlebars_token(HbScanner* scanner, char current,
     HbParseToken* token)
 {
@@ -242,7 +253,8 @@ const char* hb_token_to_string(HbParseTokenType type) {
     }
 }
 
-// Release internal memory held by <token>.
+// Release internal memory held by <token>. This allows the caller to manage
+// the memory of <token> itself.
 void hb_token_release(HbParseToken* token) {
     if (HB_TOKEN_TEXT == token->type) {
         hb_string_free(&token->string);
