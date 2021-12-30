@@ -223,4 +223,11 @@ const char* hb_token_to_string(HbParseTokenType type) {
     }
 }
 
+// Release internal memory held by <token>.
+void hb_token_release(HbParseToken* token) {
+    if (HB_TOKEN_TEXT == token->type) {
+        hb_string_free(&token->string);
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////

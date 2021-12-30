@@ -90,6 +90,9 @@ void hb_scanner_free(HbScanner* scanner);
 // Return a string describing the Parser token type (for debugging purposes)
 const char* hb_token_to_string(HbParseTokenType type);
 
+// Release internal memory held by <token>.
+void hb_token_release(HbParseToken* token);
+
 #endif // HANDLEBARS_SCANNER_H
 
 ///////////////////////////////////////////////////////////////////////////////
