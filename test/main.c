@@ -40,6 +40,7 @@
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_HbScanner_Basic);
+    RUN_TEST(test_HbScanner_Token);
     return UNITY_END();
 }
 

@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     12/29/2021
+// LAST EDITED:     12/30/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -68,16 +68,44 @@ static void priv_move_token(HbParseToken* dest, HbParseToken* source) {
 
 // Initialize a token of the given type, borrowing some context from the
 // scanner.
-static void priv_init_token(HbParseToken* token, HbParseTokenType type,
+static inline void priv_init_text_token(HbParseToken* token,
     const HbScanner* scanner)
 {
-    token->type = type;
+    token->type = HB_TOKEN_TEXT;
+    token->line = scanner->line_count;
+    token->column = scanner->column_count - 1;
+    token->string = hb_string_init();
+}
+
+static inline void priv_init_open_bars_token(HbParseToken* token,
+    const HbScanner* scanner)
+{
+    token->type = HB_TOKEN_OPEN_BARS;
+    token->line = scanner->line_count;
+    token->column = scanner->column_count - 2;
+    token->string = NULL;
+}
+
+static inline void priv_init_close_bars_token(HbParseToken* token,
+    const HbScanner* scanner)
+{
+    token->type = HB_TOKEN_CLOSE_BARS;
+    token->line = scanner->line_count;
+    token->column = scanner->column_count - 2;
+    token->string = NULL;
+}
+
+static inline void priv_init_ws_token(HbParseToken* token,
+    const HbScanner* scanner)
+{
+    token->type = HB_TOKEN_WS;
     token->line = scanner->line_count;
     token->column = scanner->column_count;
-    if (HB_TOKEN_TEXT == type) {
-        token->string = hb_string_init();
-    }
+    token->string = NULL;
 }
+
+static inline void priv_init_eof_token(HbParseToken* token)
+{ token->type = HB_TOKEN_EOF; }
 
 // Obtain the next char from the buffered stream, which could result in reading
 // more data from the stream.
@@ -92,7 +120,7 @@ static char priv_next_char(HbScanner* scanner) {
     char result = scanner->buffer[scanner->buffer_index++];
     if ('\n' == result) {
         scanner->line_count += 1;
-        scanner->column_count = -1;
+        scanner->column_count = 0;
     } else {
         scanner->column_count += 1;
     }
@@ -103,7 +131,7 @@ static char priv_next_char(HbScanner* scanner) {
 // Handle the case of HB_TOKEN_WS. If <current> is a whitespace character, and
 // whitespace token emission is enabled, generate a whitespace token and
 // indicate to the caller that a token was generated (by returning 1).
-static int priv_ws_token(HbScanner* scanner, char current,
+static int priv_check_for_ws_token(HbScanner* scanner, char current,
     HbParseToken* token)
 {
     int result = 0;
@@ -120,7 +148,7 @@ static int priv_ws_token(HbScanner* scanner, char current,
 // another character from the stream, which ends up making token emission a
 // little more complicated here. If we encountered a *_BARS token in the
 // stream, signal this to the caller by returning 1.
-static int priv_handlebars_token(HbScanner* scanner, char current,
+static int priv_check_for_handlebars_token(HbScanner* scanner, char current,
     HbParseToken* token)
 {
     if ('{' != current && '}' != current) {
@@ -131,14 +159,14 @@ static int priv_handlebars_token(HbScanner* scanner, char current,
     char next = priv_next_char(scanner);
     if (current == next) {
         priv_move_token(token, scanner->token_cache);
-        priv_init_token(scanner->token_cache, '{' == next ? HB_TOKEN_OPEN_BARS
-            : HB_TOKEN_CLOSE_BARS, scanner);
+        '{' == next ? priv_init_open_bars_token(scanner->token_cache, scanner)
+            : priv_init_close_bars_token(scanner->token_cache, scanner);
         result = 1;
-    } else if (priv_ws_token(scanner, next, token)) {
+    } else if (priv_check_for_ws_token(scanner, next, token)) {
         result = 1;
     } else if ('\0' == next) {
         priv_move_token(token, scanner->token_cache);
-        priv_init_token(scanner->token_cache, HB_TOKEN_EOF, scanner);
+        priv_init_eof_token(scanner->token_cache);
         result = 1;
     }
 
@@ -159,7 +187,6 @@ HbScanner* hb_scanner_new(HbInputContext* input_context) {
     memset(scanner, 0, sizeof(HbScanner));
     scanner->input_context = input_context;
     scanner->line_count = 1;
-    scanner->column_count = -1;
     scanner->token_cache = malloc(sizeof(HbParseToken));
     if (NULL == scanner->token_cache) {
         free(scanner);
@@ -209,27 +236,32 @@ int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token) {
 
     char current = 0;
     while ('\0' != (current = priv_next_char(scanner))) {
-        // If matching "{{" or "}}"
-        if (priv_handlebars_token(scanner, current, token) ||
-            priv_ws_token(scanner, current, token)) {
+        // If matching "{{" or "}}" or whitespace (if enabled)
+        if (priv_check_for_handlebars_token(scanner, current, token) ||
+            priv_check_for_ws_token(scanner, current, token)) {
             result = 1;
             break;
         }
 
         else {
-            if (HB_TOKEN_TEXT != token->type) {
-                priv_init_token(token, HB_TOKEN_TEXT, scanner);
+            if (HB_TOKEN_TEXT != scanner->token_cache->type) {
+                priv_init_text_token(scanner->token_cache, scanner);
                 result = 1;
             }
 
             char fragment[] = {current, '\0'};
-            hb_string_append_str(token->string, fragment);
+            hb_string_append_str(scanner->token_cache->string, fragment);
         }
+    }
+
+    // Make sure that we're returning a token
+    if (HB_TOKEN_NULL == token->type) {
+        priv_move_token(token, scanner->token_cache);
     }
 
     // Handle EOF condition:
     if ('\0' == current) {
-        priv_init_token(scanner->token_cache, HB_TOKEN_EOF, scanner);
+        priv_init_eof_token(scanner->token_cache);
     }
 
     return result;
@@ -259,6 +291,8 @@ void hb_token_release(HbParseToken* token) {
     if (HB_TOKEN_TEXT == token->type) {
         hb_string_free(&token->string);
     }
+
+    memset(token, 0, sizeof(HbParseToken));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

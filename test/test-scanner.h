@@ -34,6 +34,7 @@
 #define HANDLEBARS_TEST_SCANNER_H
 
 void test_HbScanner_Basic();
+void test_HbScanner_Token();
 
 #endif // HANDLEBARS_TEST_SCANNER_H
 
