@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     12/30/2021
+// LAST EDITED:     12/31/2021
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -38,10 +38,12 @@
 
 #include <handlebars/handlebars.h>
 #include <handlebars/scanner.h>
+#include <handlebars/scanner/char-stream.h>
 #include <handlebars/scanner/token-buffer.h>
 
 static const size_t CHAR_BUFFER_SIZE = 4096;
 static const size_t TOKEN_BUFFER_SIZE = 8;
+static const size_t PEEK_LENGTH = 2;
 
 typedef struct HbScanner {
     // If this flag is true, the scanner treats whitespace as a separate token
@@ -49,17 +51,8 @@ typedef struct HbScanner {
     // considered to be part of a HB_TOKEN_TEXT token.
     bool ws_enabled;
 
-    // Provides input stream from any source.
-    HbInputContext* input_context;
-
-    // TODO: Following could probably be abstracted into a 'CharStream' or some
-    //  such abstraction.
-
-    // Buffers related to stream lexing. We can't necessarily count on the
-    // stream underlying <input_context> to be buffered, so do it here.
-    char* buffer;
-    size_t buffer_index;
-    size_t buffer_level;
+    // Provides a buffered, character-based input stream.
+    CharStream stream;
 
     // Keep track of the line and column of the cursor
     int line_count;
@@ -126,15 +119,7 @@ static inline void priv_init_eof_token(HbParseToken* token)
 // Obtain the next char from the buffered stream, which could result in reading
 // more data from the stream.
 static char priv_next_char(HbScanner* scanner) {
-    if (scanner->buffer_index >= scanner->buffer_level) {
-        scanner->buffer_level = scanner->input_context->read(
-            scanner->input_context->data, scanner->buffer,
-            CHAR_BUFFER_SIZE - 1);
-        scanner->buffer_index = 0;
-        scanner->buffer[scanner->buffer_level] = '\0';
-    }
-
-    char result = scanner->buffer[scanner->buffer_index++];
+    char result = char_stream_next(&scanner->stream);
     if ('\n' == result) {
         scanner->line_count += 1;
         scanner->column_count = 0;
@@ -205,25 +190,18 @@ HbScanner* hb_scanner_new(HbInputContext* input_context) {
     }
 
     memset(scanner, 0, sizeof(HbScanner));
-    scanner->input_context = input_context;
     scanner->line_count = 1;
     token_buffer_init(&scanner->token_buffer, TOKEN_BUFFER_SIZE);
-    scanner->buffer = malloc(CHAR_BUFFER_SIZE);
-    if (NULL == scanner->buffer) {
-        token_buffer_release(&scanner->token_buffer);
-        free(scanner);
-        return NULL;
-    }
-    memset(scanner->buffer, 0, CHAR_BUFFER_SIZE);
+    char_stream_init(&scanner->stream, CHAR_BUFFER_SIZE, PEEK_LENGTH,
+        input_context);
 
     return scanner;
 }
 
 // Free internal memory assocaited with the scanner.
 void hb_scanner_free(HbScanner* scanner) {
-    free(scanner->buffer);
+    char_stream_release(&scanner->stream);
     token_buffer_release(&scanner->token_buffer);
-    handlebars_input_context_free(&scanner->input_context);
     free(scanner);
 }
 

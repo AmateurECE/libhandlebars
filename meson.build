@@ -42,6 +42,7 @@ libhandlebars_sources = files([
   'handlebars/parser.c',
   'handlebars/scanner.c',
   'handlebars/scanner/token-buffer.c',
+  'handlebars/scanner/char-stream.c',
 ])
 
 install_headers(
