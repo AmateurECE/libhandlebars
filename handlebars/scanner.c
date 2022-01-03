@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     12/31/2021
+// LAST EDITED:     01/02/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -63,7 +63,7 @@ typedef struct HbScanner {
 } HbScanner;
 
 ///////////////////////////////////////////////////////////////////////////////
-// HbScanner Private API
+// Token Conveniences
 ////
 
 // "Move" the data from <source> to <dest>, destroying <source>.
@@ -82,7 +82,7 @@ static inline void priv_init_text_token(HbParseToken* token,
 {
     token->type = HB_TOKEN_TEXT;
     token->line = scanner->line_count;
-    token->column = scanner->column_count - 1;
+    token->column = scanner->column_count;
     token->string = hb_string_init();
 }
 
@@ -91,7 +91,7 @@ static inline void priv_init_open_bars_token(HbParseToken* token,
 {
     token->type = HB_TOKEN_OPEN_BARS;
     token->line = scanner->line_count;
-    token->column = scanner->column_count - 2;
+    token->column = scanner->column_count;
     token->string = NULL;
 }
 
@@ -100,7 +100,7 @@ static inline void priv_init_close_bars_token(HbParseToken* token,
 {
     token->type = HB_TOKEN_CLOSE_BARS;
     token->line = scanner->line_count;
-    token->column = scanner->column_count - 2;
+    token->column = scanner->column_count;
     token->string = NULL;
 }
 
@@ -109,12 +109,16 @@ static inline void priv_init_ws_token(HbParseToken* token,
 {
     token->type = HB_TOKEN_WS;
     token->line = scanner->line_count;
-    token->column = scanner->column_count - 1;
+    token->column = scanner->column_count;
     token->string = hb_string_init();
 }
 
 static inline void priv_init_eof_token(HbParseToken* token)
 { token->type = HB_TOKEN_EOF; }
+
+///////////////////////////////////////////////////////////////////////////////
+// Private HbScanner Support Functions
+////
 
 // Obtain the next char from the buffered stream, which could result in reading
 // more data from the stream.
@@ -130,49 +134,64 @@ static char priv_next_char(HbScanner* scanner) {
     return result;
 }
 
-// Handle the case of HB_TOKEN_WS. If <current> is a whitespace character, and
-// whitespace token emission is enabled, generate a whitespace token and
-// indicate to the caller that a token was generated (by returning 1).
-static int priv_check_for_ws_token(HbScanner* scanner, char current) {
-    if (!isspace(current) || !scanner->ws_enabled) {
-        return 0;
-    }
+static bool priv_is_ws_token(const CharStream* stream)
+{ return isspace(char_stream_peek(stream, 0)); }
 
+static void priv_consume_ws_token(HbScanner* scanner) {
     HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
     priv_init_ws_token(token, scanner);
+
+    char current = char_stream_peek(&scanner->stream, 0);
     while (isspace(current)) {
         char fragment[] = {current, '\0'};
         hb_string_append_str(token->string, fragment);
-        current = priv_next_char(scanner);
+        priv_next_char(scanner);
+        current = char_stream_peek(&scanner->stream, 0);
     }
-
-    return 1;
 }
 
-// Handle the case where this character is '{' or '}'. We have to consume
-// another character from the stream, which ends up making token emission a
-// little more complicated here. If we encountered a *_BARS token in the
-// stream, signal this to the caller by returning 1.
-static int priv_check_for_handlebars_token(HbScanner* scanner, char current) {
-    if ('{' != current && '}' != current) {
-        return 0;
+// Return true if the next token in the stream is
+static bool priv_is_handlebars_token(const CharStream* stream) {
+    char current = char_stream_peek(stream, 0);
+    char next = char_stream_peek(stream, 1);
+    return ('{' == current || '}' == current) && current == next;
+}
+
+static void priv_consume_handlebars_token(HbScanner* scanner) {
+    // Have to consume two tokens from the stream.
+    char current = char_stream_peek(&scanner->stream, 0);
+    HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
+    switch (current) {
+    case '{': priv_init_open_bars_token(token, scanner); break;
+    case '}': priv_init_close_bars_token(token, scanner); break;
+    default: assert(0); // Programmer's error.
     }
 
+    // Have to consume the chars in the token after initializing the token,
+    // since token initialization captures the line/column counts.
+    priv_next_char(scanner);
+    priv_next_char(scanner);
+}
+
+static bool priv_is_eof_token(const CharStream* stream)
+{ return '\0' == char_stream_peek(stream, 0); }
+
+static void priv_consume_eof_token(HbScanner* scanner) {
+    HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
+    priv_init_eof_token(token);
+}
+
+static int priv_iterate_lexer(HbScanner* scanner) {
     int result = 0;
-    char next = priv_next_char(scanner);
-    if (current == next) {
+    if (priv_is_handlebars_token(&scanner->stream)) {
+        priv_consume_handlebars_token(scanner);
         result = 1;
-        HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
-        switch (next) {
-        case '{': priv_init_open_bars_token(token, scanner); break;
-        case '}': priv_init_close_bars_token(token, scanner); break;
-        default: assert(0); // Programmer's error.
-        }
-    } else if (priv_check_for_ws_token(scanner, next)) {
+    } else if (scanner->ws_enabled && priv_is_ws_token(&scanner->stream)) {
+        priv_consume_ws_token(scanner);
         result = 1;
-    } else if ('\0' == next) {
+    } else if (priv_is_eof_token(&scanner->stream)) {
+        priv_consume_eof_token(scanner);
         result = 1;
-        priv_init_eof_token(token_buffer_reserve(&scanner->token_buffer));
     }
 
     return result;
@@ -227,30 +246,15 @@ int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token) {
         return 1;
     }
 
-    char current = 0;
     HbParseToken* text_token = NULL;
-    while ('\0' != (current = priv_next_char(scanner))) {
-        // If matching "{{" or "}}" or whitespace (if enabled)
-        if (priv_check_for_handlebars_token(scanner, current) ||
-            priv_check_for_ws_token(scanner, current)) {
-            break;
+    while (!priv_iterate_lexer(scanner)) {
+        if (NULL == text_token) {
+            text_token = token_buffer_reserve(&scanner->token_buffer);
+            priv_init_text_token(text_token, scanner);
         }
 
-        else {
-            if (NULL == text_token) {
-                text_token = token_buffer_reserve(&scanner->token_buffer);
-                priv_init_text_token(text_token, scanner);
-            }
-
-            char fragment[] = {current, '\0'};
-            hb_string_append_str(text_token->string, fragment);
-        }
-    }
-
-    // Handle EOF condition:
-    if ('\0' == current) {
-        HbParseToken* eof_token = token_buffer_reserve(&scanner->token_buffer);
-        priv_init_eof_token(eof_token);
+        char fragment[] = {priv_next_char(scanner), '\0'};
+        hb_string_append_str(text_token->string, fragment);
     }
 
     if (0 < scanner->token_buffer.length) {

@@ -9,7 +9,7 @@
 //
 // CREATED:         12/30/2021
 //
-// LAST EDITED:     12/30/2021
+// LAST EDITED:     01/02/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -54,7 +54,7 @@ typedef struct CharStream {
 
 // Initialize a CharStream at <stream> with a peek buffer of <peek_buffer>,
 // that is, allow peeking at chars up to `<peek_buffer> - 1` positions ahead of
-// the cursor.
+// the cursor. Will assert if <peek_length> is greater than <capacity>.
 void char_stream_init(CharStream* stream, size_t capacity, size_t peek_buffer,
     HbInputContext* input_context);
 
@@ -67,9 +67,8 @@ char char_stream_next(CharStream* stream);
 
 // Peek at the char <offset> positions ahead of the cursor. Will assert if
 // <offset> is greater than the length of peek_buffer (as in char_stream_init
-// above). May also assert if the attempt to peek kicks off a read request, and
-// an error is occurred as a result.
-char char_stream_peek(CharStream* stream, size_t offset);
+// above).
+char char_stream_peek(const CharStream* stream, size_t offset);
 
 #endif // HANDLEBARS_CHAR_STREAM_H
 

@@ -7,7 +7,7 @@
 //
 // CREATED:         12/30/2021
 //
-// LAST EDITED:     12/31/2021
+// LAST EDITED:     01/02/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -30,6 +30,7 @@
 // IN THE SOFTWARE.
 ////
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -37,15 +38,40 @@
 #include <handlebars/scanner/char-stream.h>
 
 ///////////////////////////////////////////////////////////////////////////////
+// Private API
+////
+
+static void priv_fill_buffer_with_peek_shift(CharStream* stream) {
+    for (size_t i = 0; i < stream->peek_length; ++i) {
+        stream->buffer[i] = stream->buffer[stream->index + i];
+    }
+
+    stream->level = stream->input_context->read(
+        stream->input_context->data, stream->buffer + stream->peek_length,
+        stream->capacity - stream->peek_length - 1);
+    stream->index = 0;
+    stream->buffer[stream->level + stream->peek_length] = '\0';
+}
+
+static void priv_fill_buffer(CharStream* stream) {
+    stream->level = stream->input_context->read(
+        stream->input_context->data, stream->buffer,
+        stream->capacity - 1);
+    stream->index = 0;
+    stream->buffer[stream->level] = '\0';
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Public API
 ////
 
 // Initialize a CharStream at <stream> with a peek buffer of <peek_buffer>,
 // that is, allow peeking at chars up to `<peek_buffer> - 1` positions ahead of
-// the cursor.
+// the cursor. Will assert if <peek_length> is greater than <capacity>.
 void char_stream_init(CharStream* stream, size_t capacity, size_t peek_length,
     HbInputContext* input_context)
 {
+    assert(peek_length <= capacity);
     memset(stream, 0, sizeof(CharStream));
     stream->buffer = malloc(capacity);
     if (NULL == stream->buffer) {
@@ -56,6 +82,7 @@ void char_stream_init(CharStream* stream, size_t capacity, size_t peek_length,
     stream->input_context = input_context;
     stream->peek_length = peek_length;
     stream->capacity = capacity;
+    priv_fill_buffer(stream);
 }
 
 // Release internal memory held by the CharStream.
@@ -65,12 +92,9 @@ void char_stream_release(CharStream* stream)
 // Return the next char in the stream and increment the cursor. May assert if
 // an error occurs in reading.
 char char_stream_next(CharStream* stream) {
-    if (stream->index >= stream->level) {
-        stream->level = stream->input_context->read(
-            stream->input_context->data, stream->buffer,
-            stream->capacity - 1);
-        stream->index = 0;
-        stream->buffer[stream->level] = '\0';
+    // May need to read more from the input source.
+    if (stream->index >= stream->level - stream->peek_length) {
+        priv_fill_buffer_with_peek_shift(stream);
     }
 
     return stream->buffer[stream->index++];
@@ -78,8 +102,10 @@ char char_stream_next(CharStream* stream) {
 
 // Peek at the char <offset> positions ahead of the cursor. Will assert if
 // <offset> is greater than the length of peek_buffer (as in char_stream_init
-// above). May also assert if the attempt to peek kicks off a read request, and
-// an error is occurred as a result.
-char char_stream_peek(CharStream* stream, size_t offset) { return 0; }
+// above).
+char char_stream_peek(const CharStream* stream, size_t offset) {
+    assert(offset <= stream->peek_length);
+    return stream->buffer[stream->index + offset];
+}
 
 ///////////////////////////////////////////////////////////////////////////////
