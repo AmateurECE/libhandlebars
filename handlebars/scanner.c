@@ -77,44 +77,40 @@ static void priv_move_token(HbParseToken* dest, HbParseToken* source) {
 
 // Initialize a token of the given type, borrowing some context from the
 // scanner.
+static inline void priv_init_token(HbParseTokenType type, HbParseToken* token,
+    const HbScanner* scanner)
+{
+    token->type = type;
+    token->line = scanner->line_count;
+    token->column = scanner->column_count;
+    token->string = NULL;
+}
+
 static inline void priv_init_text_token(HbParseToken* token,
     const HbScanner* scanner)
 {
-    token->type = HB_TOKEN_TEXT;
-    token->line = scanner->line_count;
-    token->column = scanner->column_count;
+    priv_init_token(HB_TOKEN_TEXT, token, scanner);
     token->string = hb_string_init();
 }
 
 static inline void priv_init_open_bars_token(HbParseToken* token,
     const HbScanner* scanner)
-{
-    token->type = HB_TOKEN_OPEN_BARS;
-    token->line = scanner->line_count;
-    token->column = scanner->column_count;
-    token->string = NULL;
-}
+{ priv_init_token(HB_TOKEN_OPEN_BARS, token, scanner); }
 
 static inline void priv_init_close_bars_token(HbParseToken* token,
     const HbScanner* scanner)
-{
-    token->type = HB_TOKEN_CLOSE_BARS;
-    token->line = scanner->line_count;
-    token->column = scanner->column_count;
-    token->string = NULL;
-}
+{ priv_init_token(HB_TOKEN_CLOSE_BARS, token, scanner); }
 
 static inline void priv_init_ws_token(HbParseToken* token,
     const HbScanner* scanner)
 {
-    token->type = HB_TOKEN_WS;
-    token->line = scanner->line_count;
-    token->column = scanner->column_count;
+    priv_init_token(HB_TOKEN_WS, token, scanner);
     token->string = hb_string_init();
 }
 
-static inline void priv_init_eof_token(HbParseToken* token)
-{ token->type = HB_TOKEN_EOF; }
+static inline void priv_init_eof_token(HbParseToken* token,
+    const HbScanner* scanner)
+{ priv_init_token(HB_TOKEN_EOF, token, scanner); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private HbScanner Support Functions
@@ -178,7 +174,7 @@ static bool priv_is_eof_token(const CharStream* stream)
 
 static void priv_consume_eof_token(HbScanner* scanner) {
     HbParseToken* token = token_buffer_reserve(&scanner->token_buffer);
-    priv_init_eof_token(token);
+    priv_init_eof_token(token, scanner);
 }
 
 static int priv_iterate_lexer(HbScanner* scanner) {
