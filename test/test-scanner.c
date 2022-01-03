@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     12/30/2021
+// LAST EDITED:     01/02/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -115,7 +115,7 @@ void test_HbScanner_Whitespace() {
 static const char* EOF_TEST = "";
 void test_HbScanner_Eof() {
     scanner_token_verification_setup(EOF_TEST);
-    scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
+    scanner_token_compare(HB_TOKEN_EOF, NULL, 1, 0);
 }
 
 static const char* DOUBLE_WHITESPACE = "Text  text";
@@ -125,6 +125,7 @@ void test_HbScanner_DoubleWhitespace() {
     scanner_token_compare(HB_TOKEN_TEXT, "Text", 1, 0);
     scanner_token_compare(HB_TOKEN_WS, "  ", 1, 4);
     scanner_token_compare(HB_TOKEN_TEXT, "text", 1, 6);
+    scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
