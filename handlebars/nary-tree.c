@@ -126,12 +126,12 @@ void hb_nary_node_free(HbNaryNode* node) {
     free(node);
 }
 
-void hb_nary_node_iter_init(HbNaryNodeIter* iter, HbNaryTree* tree) {
+void hb_nary_tree_iter_init(HbNaryTreeIter* iter, HbNaryTree* tree) {
     iter->index = 0;
     iter->tree = tree;
 }
 
-HbNaryNode* hb_nary_node_iter_next(HbNaryNodeIter* iter) {
+HbNaryNode* hb_nary_tree_iter_next(HbNaryTreeIter* iter) {
     if (iter->index >= iter->tree->nodes->length) {
         return NULL;
     }

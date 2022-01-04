@@ -33,6 +33,7 @@
 #include <unity.h>
 
 #include <handlebars/handlebars.h>
+#include <handlebars/nary-tree.h>
 #include <handlebars/parser.h>
 #include <handlebars/scanner.h>
 #include "test-scanner.h"
@@ -44,7 +45,20 @@ void test_HbParser_Text() {
     HbParser* parser = hb_parser_new(scanner);
     HbNaryTree* tree = NULL;
     TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
-    TEST_ASSERT_NOT_EQUAL(NULL, tree);
+    TEST_ASSERT_NOT_NULL(tree);
+
+    HbNaryTreeIter iterator;
+    hb_nary_tree_iter_init(&iterator, tree);
+    HbNaryNode* element = hb_nary_tree_iter_next(&iterator);
+    TEST_ASSERT_NOT_NULL(element);
+    HbComponent* component = (HbComponent*)hb_nary_node_get_data(element);
+    TEST_ASSERT_NOT_NULL(component);
+    TEST_ASSERT_EQUAL_INT(HB_COMPONENT_TEXT, component->type);
+    TEST_ASSERT_EQUAL_STRING(TEXT_TEST, component->text->string);
+
+    element = hb_nary_tree_iter_next(&iterator);
+    HbNaryNode* root = hb_nary_tree_get_root(tree);
+    TEST_ASSERT_EQUAL(element, root);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

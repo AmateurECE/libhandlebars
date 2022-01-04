@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     12/29/2021
+// LAST EDITED:     01/04/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -93,11 +93,11 @@ HbString* handlebars_template_render(Handlebars* template,
     HbTemplateContext* context)
 {
     HbString* result = hb_string_init();
-    HbNaryNodeIter iterator;
-    hb_nary_node_iter_init(&iterator, template->components);
+    HbNaryTreeIter iterator;
+    hb_nary_tree_iter_init(&iterator, template->components);
     HbNaryNode* element = NULL;
     HbComponent* component = NULL;
-    while (NULL != (element = hb_nary_node_iter_next(&iterator)) &&
+    while (NULL != (element = hb_nary_tree_iter_next(&iterator)) &&
         NULL != (component = (HbComponent*)hb_nary_node_get_data(element))) {
         switch (component->type) {
         case HB_COMPONENT_TEXT:
