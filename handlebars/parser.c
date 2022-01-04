@@ -122,7 +122,11 @@ static int priv_rule_handlebars(HbParser* parser, HbNaryTree* component_tree) {
     } else if (HB_TOKEN_CLOSE_BARS == parser_top->type) {
         result = priv_parse_handlebars(parser, component_tree);
     } else if (HB_TOKEN_WS == parser_top->type) {
-        // Do nothing, but especially don't error.
+        // Pop this token from the stack and recurse
+        HbParseToken* ws_token = hb_vector_pop_back(parser->tokens);
+        assert(ws_token == parser_top);
+        hb_token_release(parser_top);
+        result = priv_rule_handlebars(parser, component_tree);
     } else {
         // TODO: Better error handling here
         assert(0); // Parse error

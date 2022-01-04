@@ -116,9 +116,41 @@ TEST(HbParser, Handlebars) {
     parser_check_root(&iterator);
 }
 
+static const char* COMBINATION_TEST = "The {{quick}} brown fox";
+TEST(HbParser, Combination) {
+    parser_verification_setup(COMBINATION_TEST);
+    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NOT_NULL(tree);
+
+    HbNaryTreeIter iterator;
+    hb_nary_tree_iter_init(&iterator, tree);
+    parser_check_text_component(&iterator, "The ");
+    static const char* argv[] = {"quick"};
+    parser_check_expression_component(&iterator,
+        sizeof(argv) / sizeof(argv[0]), argv);
+    parser_check_text_component(&iterator, " brown fox");
+    parser_check_root(&iterator);
+}
+
+static const char* MULTIPLE_TEST = "{{test1 test2}}";
+TEST(HbParser, Multiple) {
+    parser_verification_setup(MULTIPLE_TEST);
+    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NOT_NULL(tree);
+
+    HbNaryTreeIter iterator;
+    hb_nary_tree_iter_init(&iterator, tree);
+    static const char* argv[] = {"test1", "test2"};
+    parser_check_expression_component(&iterator,
+        sizeof(argv) / sizeof(argv[0]), argv);
+    parser_check_root(&iterator);
+}
+
 TEST_GROUP_RUNNER(HbParser) {
     RUN_TEST_CASE(HbParser, Text);
     RUN_TEST_CASE(HbParser, Handlebars);
+    RUN_TEST_CASE(HbParser, Combination);
+    RUN_TEST_CASE(HbParser, Multiple);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
