@@ -37,32 +37,51 @@
 #include <handlebars/parser.h>
 #include <handlebars/scanner.h>
 
+static HbInputContext* input_context;
+static HbScanner* scanner;
+static HbParser* parser;
+static HbNaryTree* tree;
+
 TEST_GROUP(HbParser);
 
-TEST_SETUP(HbParser) {}
+TEST_SETUP(HbParser) {
+    tree = NULL;
+}
 TEST_TEAR_DOWN(HbParser) {}
+
+static void parser_verification_setup(const char* string) {
+    input_context = handlebars_input_context_from_string(string);
+    scanner = hb_scanner_new(input_context);
+    parser = hb_parser_new(scanner);
+}
+
+static void parser_check_text_component(HbNaryTreeIter* iterator,
+    const char* string)
+{
+    HbNaryNode* element = hb_nary_tree_iter_next(iterator);
+    TEST_ASSERT_NOT_NULL(element);
+    HbComponent* component = (HbComponent*)hb_nary_node_get_data(element);
+    TEST_ASSERT_NOT_NULL(component);
+    TEST_ASSERT_EQUAL_INT(HB_COMPONENT_TEXT, component->type);
+    TEST_ASSERT_EQUAL_STRING(string, component->text->string);
+}
+
+static void parser_check_root(HbNaryTreeIter* iterator) {
+    HbNaryNode* element = hb_nary_tree_iter_next(iterator);
+    HbNaryNode* root = hb_nary_tree_get_root(tree);
+    TEST_ASSERT_EQUAL(element, root);
+}
 
 static const char* TEXT_TEST = "The quick brown fox";
 TEST(HbParser, Text) {
-    HbInputContext* input = handlebars_input_context_from_string(TEXT_TEST);
-    HbScanner* scanner = hb_scanner_new(input);
-    HbParser* parser = hb_parser_new(scanner);
-    HbNaryTree* tree = NULL;
+    parser_verification_setup(TEXT_TEST);
     TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
     TEST_ASSERT_NOT_NULL(tree);
 
     HbNaryTreeIter iterator;
     hb_nary_tree_iter_init(&iterator, tree);
-    HbNaryNode* element = hb_nary_tree_iter_next(&iterator);
-    TEST_ASSERT_NOT_NULL(element);
-    HbComponent* component = (HbComponent*)hb_nary_node_get_data(element);
-    TEST_ASSERT_NOT_NULL(component);
-    TEST_ASSERT_EQUAL_INT(HB_COMPONENT_TEXT, component->type);
-    TEST_ASSERT_EQUAL_STRING(TEXT_TEST, component->text->string);
-
-    element = hb_nary_tree_iter_next(&iterator);
-    HbNaryNode* root = hb_nary_tree_get_root(tree);
-    TEST_ASSERT_EQUAL(element, root);
+    parser_check_text_component(&iterator, TEXT_TEST);
+    parser_check_root(&iterator);
 }
 
 TEST_GROUP_RUNNER(HbParser) {
