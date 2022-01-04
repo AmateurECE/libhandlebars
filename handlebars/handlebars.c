@@ -37,6 +37,8 @@
 
 #include <handlebars/handlebars.h>
 #include <handlebars/nary-tree.h>
+#include <handlebars/parser.h>
+#include <handlebars/scanner.h>
 #include <handlebars/vector.h>
 
 // This struct contains context necessary to parse the template and render it
@@ -44,28 +46,6 @@
 typedef struct Handlebars {
     HbNaryTree* components;
 } Handlebars;
-
-// Component types handled so far:
-enum HbComponentType {
-    HB_COMPONENT_TEXT, // A simple block of text
-    HB_COMPONENT_EXPR, // An expression. Could be context subst. or helper
-};
-
-// Components that provide the parts necessary to render a template.
-typedef struct HbComponent {
-    enum HbComponentType type;
-    union {
-        // Used for HB_COMPONENT_TEXT
-        HbString* string;
-
-        // Usage for HB_COMPONENT_EXPR
-        HbVector* arguments;
-    };
-} HbComponent;
-
-///////////////////////////////////////////////////////////////////////////////
-// Private API
-////
 
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
@@ -81,7 +61,26 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
         return NULL;
     }
 
+    HbScanner* scanner = hb_scanner_new(input_context);
+    if (NULL == scanner) {
+        free(template);
+        return NULL;
+    }
+    HbParser* parser = hb_parser_new(scanner);
+    if (NULL == parser) {
+        hb_scanner_free(scanner);
+        free(template);
+        return NULL;
+    }
+
     memset(template, 0, sizeof(Handlebars));
+    int parse_result = hb_parser_parse(parser, &template->components);
+    if (0 != parse_result) {
+        hb_parser_free(parser);
+        free(template);
+        return NULL;
+    }
+
     return template;
 }
 
@@ -101,16 +100,16 @@ HbString* handlebars_template_render(Handlebars* template,
         NULL != (component = (HbComponent*)hb_nary_node_get_data(element))) {
         switch (component->type) {
         case HB_COMPONENT_TEXT:
-            if (0 != hb_string_append(result, component->string)) {
+            if (0 != hb_string_append(result, component->text)) {
                 hb_string_free(&result);
                 return NULL;
             }
             break;
-        case HB_COMPONENT_EXPR: {
+        case HB_COMPONENT_EXPRESSION: {
             // Simple expression: Just substitute from context.
-            if (1 == component->arguments->length) {
+            if (1 == component->argv->length) {
                 const HbString* value = handlebars_template_context_get(
-                    context, (HbString*)component->arguments->vector[0]);
+                    context, (HbString*)component->argv->vector[0]);
                 if (NULL == value) {
                     break;
                 }
