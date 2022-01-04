@@ -153,12 +153,28 @@ TEST(HbParser, UnclosedExpressionError) {
     TEST_ASSERT_NULL(tree);
 }
 
+static const char* MISMATCHED_HANDLEBARS_ERROR_TEST = "}}";
+TEST(HbParser, MismatchedHandlebarsError) {
+    parser_verification_setup(MISMATCHED_HANDLEBARS_ERROR_TEST);
+    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NULL(tree);
+}
+
+static const char* NESTED_EXPRESSION_ERROR_TEST = "{{test {{";
+TEST(HbParser, NestedExpressionError) {
+    parser_verification_setup(NESTED_EXPRESSION_ERROR_TEST);
+    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NULL(tree);
+}
+
 TEST_GROUP_RUNNER(HbParser) {
     RUN_TEST_CASE(HbParser, Text);
     RUN_TEST_CASE(HbParser, Handlebars);
     RUN_TEST_CASE(HbParser, Combination);
     RUN_TEST_CASE(HbParser, Multiple);
     RUN_TEST_CASE(HbParser, UnclosedExpressionError);
+    RUN_TEST_CASE(HbParser, MismatchedHandlebarsError);
+    RUN_TEST_CASE(HbParser, NestedExpressionError);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
