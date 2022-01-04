@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     01/03/2022
+// LAST EDITED:     01/04/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -33,23 +33,12 @@
 #include <stdio.h>
 
 #include <handlebars.h>
-#include <unity.h>
-
-#include "test-parser.h"
-#include "test-scanner.h"
+#include <unity_fixture.h>
 
 int main() {
     UNITY_BEGIN();
-
-    // Scanner tests
-    RUN_TEST(test_HbScanner_Basic);
-    RUN_TEST(test_HbScanner_Token);
-    RUN_TEST(test_HbScanner_Whitespace);
-    RUN_TEST(test_HbScanner_Eof);
-    RUN_TEST(test_HbScanner_DoubleWhitespace);
-
-    // Parser tests
-    RUN_TEST(test_HbParser_Text);
+    RUN_TEST_GROUP(HbScanner);
+    RUN_TEST_GROUP(HbParser);
     return UNITY_END();
 }
 

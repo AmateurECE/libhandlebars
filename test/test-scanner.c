@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/03/2022
+// LAST EDITED:     01/04/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -32,23 +32,23 @@
 
 #include <string.h>
 
-#include <unity.h>
+#include <unity_fixture.h>
 
 #include <handlebars/handlebars.h>
 #include <handlebars/scanner.h>
-#include "test-scanner.h"
 
 static HbInputContext* input_context;
 static HbScanner* scanner;
 static HbParseToken token;
 
-void setUp() {
+TEST_GROUP(HbScanner);
+TEST_SETUP(HbScanner) {
     input_context = NULL;
     scanner = NULL;
     memset(&token, 0, sizeof(HbParseToken));
 }
 
-void tearDown() {
+TEST_TEAR_DOWN(HbScanner) {
     if (NULL != scanner) {
         hb_scanner_free(scanner);
     }
@@ -81,7 +81,7 @@ void scanner_token_compare(HbParseTokenType type, const char* string, int line,
 }
 
 static const char* BASIC_TEST = "The quick brown fox jumped over the lazy dog";
-void test_HbScanner_Basic() {
+TEST(HbScanner, Basic) {
     scanner_token_verification_setup(BASIC_TEST);
     scanner_token_compare(HB_TOKEN_TEXT, BASIC_TEST, 1, 0);
     TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
@@ -89,7 +89,7 @@ void test_HbScanner_Basic() {
 }
 
 static const char* TOKEN_TEST = "Text {{ whitespace }}.";
-void test_HbScanner_Token() {
+TEST(HbScanner, Token) {
     scanner_token_verification_setup(TOKEN_TEST);
     scanner_token_compare(HB_TOKEN_TEXT, "Text ", 1, 0);
     scanner_token_compare(HB_TOKEN_OPEN_BARS, NULL, 1, 5);
@@ -100,7 +100,7 @@ void test_HbScanner_Token() {
 }
 
 static const char* WHITESPACE_TEST = "Text {{ whitespace }}.";
-void test_HbScanner_Whitespace() {
+TEST(HbScanner, Whitespace) {
     scanner_token_verification_setup(WHITESPACE_TEST);
     scanner_token_compare(HB_TOKEN_TEXT, "Text ", 1, 0);
     scanner_token_compare(HB_TOKEN_OPEN_BARS, NULL, 1, 5);
@@ -115,19 +115,27 @@ void test_HbScanner_Whitespace() {
 }
 
 static const char* EOF_TEST = "";
-void test_HbScanner_Eof() {
+TEST(HbScanner, Eof) {
     scanner_token_verification_setup(EOF_TEST);
     scanner_token_compare(HB_TOKEN_EOF, NULL, 1, 0);
 }
 
 static const char* DOUBLE_WHITESPACE = "Text  text";
-void test_HbScanner_DoubleWhitespace() {
+TEST(HbScanner, DoubleWhitespace) {
     scanner_token_verification_setup(DOUBLE_WHITESPACE);
     hb_scanner_enable_ws_token(scanner);
     scanner_token_compare(HB_TOKEN_TEXT, "Text", 1, 0);
     scanner_token_compare(HB_TOKEN_WS, "  ", 1, 4);
     scanner_token_compare(HB_TOKEN_TEXT, "text", 1, 6);
     scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
+}
+
+TEST_GROUP_RUNNER(HbScanner) {
+    RUN_TEST_CASE(HbScanner, Basic);
+    RUN_TEST_CASE(HbScanner, Token);
+    RUN_TEST_CASE(HbScanner, Whitespace);
+    RUN_TEST_CASE(HbScanner, Eof);
+    RUN_TEST_CASE(HbScanner, DoubleWhitespace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

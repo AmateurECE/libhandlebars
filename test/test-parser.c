@@ -30,16 +30,20 @@
 // IN THE SOFTWARE.
 ////
 
-#include <unity.h>
+#include <unity_fixture.h>
 
 #include <handlebars/handlebars.h>
 #include <handlebars/nary-tree.h>
 #include <handlebars/parser.h>
 #include <handlebars/scanner.h>
-#include "test-scanner.h"
+
+TEST_GROUP(HbParser);
+
+TEST_SETUP(HbParser) {}
+TEST_TEAR_DOWN(HbParser) {}
 
 static const char* TEXT_TEST = "The quick brown fox";
-void test_HbParser_Text() {
+TEST(HbParser, Text) {
     HbInputContext* input = handlebars_input_context_from_string(TEXT_TEST);
     HbScanner* scanner = hb_scanner_new(input);
     HbParser* parser = hb_parser_new(scanner);
@@ -59,6 +63,10 @@ void test_HbParser_Text() {
     element = hb_nary_tree_iter_next(&iterator);
     HbNaryNode* root = hb_nary_tree_get_root(tree);
     TEST_ASSERT_EQUAL(element, root);
+}
+
+TEST_GROUP_RUNNER(HbParser) {
+    RUN_TEST_CASE(HbParser, Text);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
