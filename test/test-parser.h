@@ -1,15 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            main.c
+// NAME:            test-parser.h
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Entrypoint for test application.
+// DESCRIPTION:     Tests for the parser.
 //
-// CREATED:         11/20/2021
+// CREATED:         01/03/2022
 //
 // LAST EDITED:     01/03/2022
 //
-// Copyright 2021, Ethan D. Twardy
+// Copyright 2022, Ethan D. Twardy
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -30,27 +30,11 @@
 // IN THE SOFTWARE.
 ////
 
-#include <stdio.h>
+#ifndef HANDLEBARS_TEST_PARSER_H
+#define HANDLEBARS_TEST_PARSER_H
 
-#include <handlebars.h>
-#include <unity.h>
+void test_HbParser_Text();
 
-#include "test-parser.h"
-#include "test-scanner.h"
-
-int main() {
-    UNITY_BEGIN();
-
-    // Scanner tests
-    RUN_TEST(test_HbScanner_Basic);
-    RUN_TEST(test_HbScanner_Token);
-    RUN_TEST(test_HbScanner_Whitespace);
-    RUN_TEST(test_HbScanner_Eof);
-    RUN_TEST(test_HbScanner_DoubleWhitespace);
-
-    // Parser tests
-    RUN_TEST(test_HbParser_Text);
-    return UNITY_END();
-}
+#endif // HANDLEBARS_TEST_PARSER_H
 
 ///////////////////////////////////////////////////////////////////////////////

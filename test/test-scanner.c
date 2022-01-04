@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/02/2022
+// LAST EDITED:     01/03/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -49,7 +49,9 @@ void setUp() {
 }
 
 void tearDown() {
-    hb_scanner_free(scanner);
+    if (NULL != scanner) {
+        hb_scanner_free(scanner);
+    }
 }
 
 void scanner_token_verification_setup(const char* test_string) {

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/25/2021
 //
-// LAST EDITED:     12/17/2021
+// LAST EDITED:     01/04/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -89,6 +89,17 @@ int hb_vector_push_back(HbVector* vector, void* user_data) {
 
     vector->vector[vector->length++] = user_data;
     return 0;
+}
+
+void* hb_vector_pop_back(HbVector* vector) {
+    if (0 == vector->length) {
+        return NULL;
+    }
+
+    void* result = vector->vector[vector->length - 1];
+    vector->vector[vector->length - 1] = NULL;
+    vector->length -= 1;
+    return result;
 }
 
 int hb_vector_insert(HbVector* vector, size_t index, void* user_data) {

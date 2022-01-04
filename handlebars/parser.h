@@ -8,7 +8,7 @@
 //
 // CREATED:         12/28/2021
 //
-// LAST EDITED:     12/29/2021
+// LAST EDITED:     01/03/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -38,28 +38,36 @@
 typedef struct HbParser HbParser;
 
 // Forward declarations
-typedef struct HbScanner HbScanner;
 typedef struct HbNaryTree HbNaryTree;
+typedef struct HbScanner HbScanner;
+typedef struct HbString HbString;
+
+typedef enum HbComponentType {
+    HB_COMPONENT_TEXT,
+} HbComponentType;
+
+typedef struct HbComponent {
+    HbComponentType type;
+    HbString* text;
+} HbComponent;
 
 // Create a new handlebars parser, injecting the scanner. The parser takes
 // ownership of and is responsible for freeing the scanner.
-HbParser* hb_parser_new(HbScanner* scanner, void* user_data);
+HbParser* hb_parser_new(HbScanner* scanner);
 
 // Free the parser and all associated internal memory.
 void hb_parser_free(HbParser* parser);
-
-// Iterate the parser. If the parser has reached a syntax error, acceptance,
-// end of stream, or other terminating condition, zero is returned.
-int hb_parser_parse(HbParser* parser);
 
 // The parser's job is to construct an Abstract Syntax Tree from the input
 // text. The AST is then a direct input to the rendering logic, which performs
 // reduce operations in a bottom-up fashion. This function increases the
 // reference count on the HbNaryTree which forms the internal representation of
-// the AST and returns it. If the parser has not terminated, this function
-// returns NULL. NOTE that the AST returned by this function is NOT the parse
-// tree, but is instead a simplified AST optimized for template rendering.
-HbNaryTree* hb_parser_get_ast(HbParser* parser);
+// the AST and returns it. If the parser exited successfully, zero is returned.
+// NOTE that the AST returned by this function is NOT the parse tree, but is
+// instead a simplified AST optimized for template rendering. Additionally, the
+// returned tree is allocated memory, which much be released using
+// hb_nary_tree_free().
+int hb_parser_parse(HbParser* parser, HbNaryTree** component_tree);
 
 #endif // HANDLEBARS_PARSER_H
 

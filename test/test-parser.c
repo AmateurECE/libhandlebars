@@ -1,15 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            main.c
+// NAME:            test-parser.c
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Entrypoint for test application.
+// DESCRIPTION:     Tests for the parser.
 //
-// CREATED:         11/20/2021
+// CREATED:         01/03/2022
 //
-// LAST EDITED:     01/03/2022
+// LAST EDITED:     01/04/2022
 //
-// Copyright 2021, Ethan D. Twardy
+// Copyright 2022, Ethan D. Twardy
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -30,27 +30,21 @@
 // IN THE SOFTWARE.
 ////
 
-#include <stdio.h>
-
-#include <handlebars.h>
 #include <unity.h>
 
-#include "test-parser.h"
+#include <handlebars/handlebars.h>
+#include <handlebars/parser.h>
+#include <handlebars/scanner.h>
 #include "test-scanner.h"
 
-int main() {
-    UNITY_BEGIN();
-
-    // Scanner tests
-    RUN_TEST(test_HbScanner_Basic);
-    RUN_TEST(test_HbScanner_Token);
-    RUN_TEST(test_HbScanner_Whitespace);
-    RUN_TEST(test_HbScanner_Eof);
-    RUN_TEST(test_HbScanner_DoubleWhitespace);
-
-    // Parser tests
-    RUN_TEST(test_HbParser_Text);
-    return UNITY_END();
+static const char* TEXT_TEST = "The quick brown fox";
+void test_HbParser_Text() {
+    HbInputContext* input = handlebars_input_context_from_string(TEXT_TEST);
+    HbScanner* scanner = hb_scanner_new(input);
+    HbParser* parser = hb_parser_new(scanner);
+    HbNaryTree* tree = NULL;
+    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NOT_EQUAL(NULL, tree);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

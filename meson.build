@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      12/30/2021
+# LAST EDITED:      01/03/2022
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -66,6 +66,7 @@ executable(
   'testhandlebars',
   sources: files([
     'test/main.c',
+    'test/test-parser.c',
     'test/test-scanner.c',
   ]),
   include_directories: ['handlebars'],
