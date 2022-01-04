@@ -7,7 +7,7 @@
 //
 // CREATED:         12/17/2021
 //
-// LAST EDITED:     12/17/2021
+// LAST EDITED:     01/04/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -77,26 +77,17 @@ void hb_nary_tree_free(HbNaryTree** tree) {
 HbNaryNode* hb_nary_tree_get_root(HbNaryTree* tree)
 { return tree->nodes->vector[tree->nodes->length - 1]; }
 
-HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data)) {
-    HbNaryNode* node = malloc(sizeof(HbNaryNode));
-    if (NULL == node) {
-        return NULL;
+void hb_nary_tree_set_root(HbNaryTree* tree, HbNaryNode* node) {
+    if (0 == tree->nodes->length) {
+        hb_vector_push_back(tree->nodes, node);
+    } else {
+        tree->nodes->vector[tree->nodes->length - 1] = node;
     }
-
-    memset(node, 0, sizeof(HbNaryNode));
-    node->user_data = user_data;
-    node->free = free;
-    return node;
 }
 
-int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
+int hb_nary_tree_append_child_to_node(HbNaryTree* tree, HbNaryNode* parent,
     HbNaryNode* child)
 {
-    if (0 == tree->nodes->length) {
-        hb_vector_push_back(tree->nodes, child);
-        return 0;
-    }
-
     size_t index = 0;
     for (index = tree->nodes->length - 1; index != SIZE_MAX; --index) {
         HbNaryNode* node = tree->nodes->vector[index];
@@ -108,6 +99,18 @@ int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
     hb_vector_insert(tree->nodes, index + 1, child);
     child->parent = parent;
     return 0;
+}
+
+HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data)) {
+    HbNaryNode* node = malloc(sizeof(HbNaryNode));
+    if (NULL == node) {
+        return NULL;
+    }
+
+    memset(node, 0, sizeof(HbNaryNode));
+    node->user_data = user_data;
+    node->free = free;
+    return node;
 }
 
 HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node)

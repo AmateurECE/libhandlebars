@@ -78,7 +78,8 @@ int priv_rule_expression(HbParser* parser, HbNaryTree* component_tree) {
         component->text = hb_string_init();
         hb_string_append(component->text, parser_top->string);
         HbNaryNode* node = hb_nary_node_new(component, priv_component_free);
-        hb_nary_node_append_child(component_tree, parser->tree_top, node);
+        hb_nary_tree_append_child_to_node(component_tree, parser->tree_top,
+            node);
         assert(parser_top == hb_vector_pop_back(parser->tokens));
         hb_token_release(parser_top);
         result = 1;
@@ -137,7 +138,7 @@ int hb_parser_parse(HbParser* parser, HbNaryTree** component_tree) {
         hb_nary_tree_free(component_tree);
         return 1;
     }
-    hb_nary_node_append_child(*component_tree, NULL, node);
+    hb_nary_tree_set_root(*component_tree, node);
     parser->tree_top = node;
 
     int parse_result = priv_rule_expression(parser, *component_tree);

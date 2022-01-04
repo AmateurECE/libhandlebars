@@ -8,7 +8,7 @@
 //
 // CREATED:         12/17/2021
 //
-// LAST EDITED:     12/17/2021
+// LAST EDITED:     01/04/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -45,10 +45,11 @@ typedef struct HbNaryNodeIter {
 HbNaryTree* hb_nary_tree_new();
 void hb_nary_tree_free(HbNaryTree** tree);
 HbNaryNode* hb_nary_tree_get_root(HbNaryTree* tree);
+void hb_nary_tree_set_root(HbNaryTree* tree, HbNaryNode* node);
+int hb_nary_tree_append_child_to_node(HbNaryTree* tree, HbNaryNode* parent,
+    HbNaryNode* child);
 
 HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data));
-int hb_nary_node_append_child(HbNaryTree* tree, HbNaryNode* parent,
-    HbNaryNode* child);
 HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node);
 void hb_nary_node_free(HbNaryNode* node);
 void* hb_nary_node_get_data(HbNaryNode* node);
