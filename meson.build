@@ -30,7 +30,7 @@
 # IN THE SOFTWARE.
 ###
 
-project('libhandlebars', 'c', version: '0.1.4')
+project('libhandlebars', 'c', version: '0.2.0')
 
 libhandlebars_sources = files([
   'handlebars/handlebars.c',

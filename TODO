@@ -1,7 +1,19 @@
-* Rename handlebars_* functions to be hb_*.
-* Add a *_set_strings convenience method to make code that has to add a lot of
-  context?
-* Finish writing handwritten parser.
-* Doxygen docs.
-* Refactor all "free()" functions to be congruent with free(3) signature.
-* Fix symbol exports
+* v0.2.0 Release
+* Remove template context API in lieu of a SAX-style interface
+* Rename handlebars_* functions to be hb_*
+* Refactor all "free()" functions to be congruent with free(3) signature
+* Refactor ctors/dtors to be congruent with new/init free/release semantics
+* Attempt to hide all internal types (including, if possible, HbString)
+* v0.3.0 Release
+* Static analysis integration
+* Rename internal methods to remove any hb_ prefix
+* Block expressions
+* Default handlers (e.g. link, each, etc.)
+* Logger
+* v0.4.0 Release (Mostly production ready)
+* Allocation-free interface
+* Handler/Key load-time resolution (allow for int comp., vs. string comp.)
+* Fix symbol exports (gcc.gnu.org/wiki/Visibility)
+* CI/CD Platform
+* abidiff integration
+* Doxygen docs
