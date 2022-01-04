@@ -146,11 +146,19 @@ TEST(HbParser, Multiple) {
     parser_check_root(&iterator);
 }
 
+static const char* UNCLOSED_EXPRESSION_ERROR_TEST = "{{test";
+TEST(HbParser, UnclosedExpressionError) {
+    parser_verification_setup(UNCLOSED_EXPRESSION_ERROR_TEST);
+    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NULL(tree);
+}
+
 TEST_GROUP_RUNNER(HbParser) {
     RUN_TEST_CASE(HbParser, Text);
     RUN_TEST_CASE(HbParser, Handlebars);
     RUN_TEST_CASE(HbParser, Combination);
     RUN_TEST_CASE(HbParser, Multiple);
+    RUN_TEST_CASE(HbParser, UnclosedExpressionError);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
