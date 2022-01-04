@@ -49,13 +49,13 @@ typedef struct HbParser {
 // Private API
 ////
 
-void priv_parse_token_free(void* data) {
+static void priv_parse_token_free(void* data) {
     HbParseToken* token = (HbParseToken*)data;
     hb_token_release(token);
     free(token);
 }
 
-void priv_component_free(void* data) {
+static void priv_component_free(void* data) {
     HbComponent* component = (HbComponent*)data;
     if (NULL != component->text) {
         hb_string_free(&component->text);
@@ -63,7 +63,75 @@ void priv_component_free(void* data) {
     free(data);
 }
 
-int priv_rule_expression(HbParser* parser, HbNaryTree* component_tree) {
+static int priv_parse_text(HbParser* parser, HbNaryTree* component_tree) {
+    HbParseToken* parser_top = hb_vector_pop_back(parser->tokens);
+    assert(HB_TOKEN_TEXT == parser_top->type); // Programmer's error.
+    HbComponent* component = malloc(sizeof(HbComponent));
+    component->type = HB_COMPONENT_TEXT;
+    component->text = hb_string_init();
+    hb_string_append(component->text, parser_top->string);
+    HbNaryNode* node = hb_nary_node_new(component, priv_component_free);
+    hb_nary_tree_append_child_to_node(component_tree, parser->tree_top,
+        node);
+    hb_token_release(parser_top);
+    return 1;
+}
+
+static int priv_parse_handlebars(HbParser* parser, HbNaryTree* tree) {
+    HbParseToken* parser_top = hb_vector_pop_back(parser->tokens);
+    assert(HB_TOKEN_CLOSE_BARS == parser_top->type); // Programmer's error.
+
+    HbComponent* component = malloc(sizeof(HbComponent));
+    if (NULL == component) {
+        return 0;
+    }
+
+    component->type = HB_COMPONENT_EXPRESSION;
+    component->argv = hb_vector_init();
+    while (HB_TOKEN_OPEN_BARS != parser_top->type) {
+        hb_token_release(parser_top);
+        parser_top = hb_vector_pop_back(parser->tokens);
+        if (HB_TOKEN_TEXT == parser_top->type) {
+            HbString* argument = hb_string_init();
+            hb_string_append(argument, parser_top->string);
+            hb_vector_insert(component->argv, 0, argument);
+        } else if (HB_TOKEN_OPEN_BARS == parser_top->type) {
+            // Do nothing, but especially don't error.
+        } else {
+            assert(0); // Programmer's error.
+        }
+    }
+
+    hb_token_release(parser_top);
+    HbNaryNode* node = hb_nary_node_new(component, priv_component_free);
+    hb_nary_tree_append_child_to_node(tree, parser->tree_top, node);
+    return 1;
+}
+
+static int priv_rule_handlebars(HbParser* parser, HbNaryTree* component_tree) {
+    int result = 0;
+    HbParseToken* parser_top = malloc(sizeof(HbParseToken));
+    if (NULL == parser_top) {
+        return 0;
+    }
+
+    hb_vector_push_back(parser->tokens, parser_top);
+    hb_scanner_next_symbol(parser->scanner, parser_top);
+    if (HB_TOKEN_TEXT == parser_top->type) {
+        result = priv_rule_handlebars(parser, component_tree);
+    } else if (HB_TOKEN_CLOSE_BARS == parser_top->type) {
+        result = priv_parse_handlebars(parser, component_tree);
+    } else if (HB_TOKEN_WS == parser_top->type) {
+        // Do nothing, but especially don't error.
+    } else {
+        // TODO: Better error handling here
+        assert(0); // Parse error
+    }
+
+    return result;
+}
+
+static int priv_rule_expression(HbParser* parser, HbNaryTree* component_tree) {
     HbParseToken* parser_top = malloc(sizeof(HbParseToken));
     if (NULL == parser_top) {
         return 0;
@@ -73,16 +141,16 @@ int priv_rule_expression(HbParser* parser, HbNaryTree* component_tree) {
     hb_vector_push_back(parser->tokens, parser_top);
     hb_scanner_next_symbol(parser->scanner, parser_top);
     if (HB_TOKEN_TEXT == parser_top->type) {
-        HbComponent* component = malloc(sizeof(HbComponent));
-        component->type = HB_COMPONENT_TEXT;
-        component->text = hb_string_init();
-        hb_string_append(component->text, parser_top->string);
-        HbNaryNode* node = hb_nary_node_new(component, priv_component_free);
-        hb_nary_tree_append_child_to_node(component_tree, parser->tree_top,
-            node);
-        assert(parser_top == hb_vector_pop_back(parser->tokens));
-        hb_token_release(parser_top);
-        result = 1;
+        result = priv_parse_text(parser, component_tree);
+    } else if (HB_TOKEN_OPEN_BARS == parser_top->type) {
+        hb_scanner_enable_ws_token(parser->scanner);
+        result = priv_rule_handlebars(parser, component_tree);
+        hb_scanner_disable_ws_token(parser->scanner);
+    } else if (HB_TOKEN_EOF == parser_top->type) {
+        // Do nothing, but especially don't error.
+    } else {
+        // TODO: Better error handling here.
+        assert(0); // Parser error.
     }
 
     return result;

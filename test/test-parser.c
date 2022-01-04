@@ -36,6 +36,7 @@
 #include <handlebars/nary-tree.h>
 #include <handlebars/parser.h>
 #include <handlebars/scanner.h>
+#include <handlebars/vector.h>
 
 static HbInputContext* input_context;
 static HbScanner* scanner;
@@ -63,7 +64,24 @@ static void parser_check_text_component(HbNaryTreeIter* iterator,
     HbComponent* component = (HbComponent*)hb_nary_node_get_data(element);
     TEST_ASSERT_NOT_NULL(component);
     TEST_ASSERT_EQUAL_INT(HB_COMPONENT_TEXT, component->type);
+    TEST_ASSERT_NOT_NULL(component->text);
     TEST_ASSERT_EQUAL_STRING(string, component->text->string);
+}
+
+static void parser_check_expression_component(HbNaryTreeIter* iterator,
+    const size_t length, const char* argv[length])
+{
+    HbNaryNode* element = hb_nary_tree_iter_next(iterator);
+    TEST_ASSERT_NOT_NULL(element);
+    HbComponent* component = (HbComponent*)hb_nary_node_get_data(element);
+    TEST_ASSERT_NOT_NULL(component);
+    TEST_ASSERT_EQUAL_INT(HB_COMPONENT_EXPRESSION, component->type);
+    TEST_ASSERT_NOT_NULL(component->argv);
+    TEST_ASSERT_EQUAL_INT(length, component->argv->length);
+    for (size_t i = 0; i < length; ++i) {
+        HbString* argument = (HbString*)component->argv->vector[i];
+        TEST_ASSERT_EQUAL_STRING(argv[i], argument->string);
+    }
 }
 
 static void parser_check_root(HbNaryTreeIter* iterator) {
@@ -84,8 +102,23 @@ TEST(HbParser, Text) {
     parser_check_root(&iterator);
 }
 
+static const char* HANDLEBARS_TEST = "{{test}}";
+TEST(HbParser, Handlebars) {
+    parser_verification_setup(HANDLEBARS_TEST);
+    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NOT_NULL(tree);
+
+    HbNaryTreeIter iterator;
+    hb_nary_tree_iter_init(&iterator, tree);
+    static const char* argv[] = {"test"};
+    parser_check_expression_component(&iterator,
+        sizeof(argv) / sizeof(argv[0]), argv);
+    parser_check_root(&iterator);
+}
+
 TEST_GROUP_RUNNER(HbParser) {
     RUN_TEST_CASE(HbParser, Text);
+    RUN_TEST_CASE(HbParser, Handlebars);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

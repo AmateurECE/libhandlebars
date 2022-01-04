@@ -8,7 +8,7 @@
 //
 // CREATED:         12/28/2021
 //
-// LAST EDITED:     01/03/2022
+// LAST EDITED:     01/04/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -43,12 +43,20 @@ typedef struct HbScanner HbScanner;
 typedef struct HbString HbString;
 
 typedef enum HbComponentType {
+    // Text (forming the stuff around the template exprs.)
     HB_COMPONENT_TEXT,
+
+    // Substitution (e.g. "{{sometext}}", where "sometext" is a recognized key
+    // in the template context.
+    HB_COMPONENT_EXPRESSION,
 } HbComponentType;
 
 typedef struct HbComponent {
     HbComponentType type;
-    HbString* text;
+    union {
+        HbString* text; // Text for HB_COMPONENT_TEXT
+        HbVector* argv; // Arguments for a handlebars expression
+    };
 } HbComponent;
 
 // Create a new handlebars parser, injecting the scanner. The parser takes
