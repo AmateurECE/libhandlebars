@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/05/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -86,6 +86,7 @@ static int priv_parse_handlebars(HbParser* parser, HbNaryTree* tree) {
         return 1;
     }
 
+    int result = 0;
     component->type = HB_COMPONENT_EXPRESSION;
     component->argv = hb_vector_init();
     while (HB_TOKEN_OPEN_BARS != parser_top->type) {
@@ -96,7 +97,11 @@ static int priv_parse_handlebars(HbParser* parser, HbNaryTree* tree) {
             hb_string_append(argument, parser_top->string);
             hb_vector_insert(component->argv, 0, argument);
         } else if (HB_TOKEN_OPEN_BARS == parser_top->type) {
-            // Do nothing, but especially don't error.
+            // As long as there was more than one text token between the
+            // open token and close token, this is a valid expression.
+            if (0 == component->argv->length) {
+                result = 1;
+            }
         } else {
             assert(0); // Programmer's error.
         }
@@ -105,7 +110,7 @@ static int priv_parse_handlebars(HbParser* parser, HbNaryTree* tree) {
     hb_token_release(parser_top);
     HbNaryNode* node = hb_nary_node_new(component, priv_component_free);
     hb_nary_tree_append_child_to_node(tree, parser->tree_top, node);
-    return 0;
+    return result;
 }
 
 static int priv_rule_handlebars(HbParser* parser, HbNaryTree* component_tree) {

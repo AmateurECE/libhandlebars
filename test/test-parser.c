@@ -7,7 +7,7 @@
 //
 // CREATED:         01/03/2022
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/05/2022
 //
 // Copyright 2022, Ethan D. Twardy
 //
@@ -167,6 +167,13 @@ TEST(HbParser, NestedExpressionError) {
     TEST_ASSERT_NULL(tree);
 }
 
+static const char* EMPTY_EXPRESSION_ERROR_TEST = "{{}}";
+TEST(HbParser, EmptyExpressionError) {
+    parser_verification_setup(EMPTY_EXPRESSION_ERROR_TEST);
+    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_NULL(tree);
+}
+
 TEST_GROUP_RUNNER(HbParser) {
     RUN_TEST_CASE(HbParser, Text);
     RUN_TEST_CASE(HbParser, Handlebars);
@@ -175,6 +182,7 @@ TEST_GROUP_RUNNER(HbParser) {
     RUN_TEST_CASE(HbParser, UnclosedExpressionError);
     RUN_TEST_CASE(HbParser, MismatchedHandlebarsError);
     RUN_TEST_CASE(HbParser, NestedExpressionError);
+    RUN_TEST_CASE(HbParser, EmptyExpressionError);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
