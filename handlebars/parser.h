@@ -41,6 +41,7 @@ typedef struct HbParser HbParser;
 typedef struct HbNaryTree HbNaryTree;
 typedef struct HbScanner HbScanner;
 typedef struct HbString HbString;
+typedef struct HbVector HbVector;
 
 typedef enum HbComponentType {
     // Text (forming the stuff around the template exprs.)

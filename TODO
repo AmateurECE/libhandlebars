@@ -1,10 +1,13 @@
 * v0.2.0 Release
 * Remove template context API in lieu of a SAX-style interface
+* Test "{{}}" input with parser
 * Rename handlebars_* functions to be hb_*
 * Refactor all "free()" functions to be congruent with free(3) signature
 * Refactor ctors/dtors to be congruent with new/init free/release semantics
 * Attempt to hide all internal types (including, if possible, HbString)
+* Align on "ownership passing ctors"
 * v0.3.0 Release
+* Memory leak investigation
 * Static analysis integration
 * Rename internal methods to remove any hb_ prefix
 * Block expressions

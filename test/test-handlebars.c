@@ -30,6 +30,8 @@
 // IN THE SOFTWARE.
 ////
 
+#include <string.h>
+
 #include <unity_fixture.h>
 
 #include <handlebars/handlebars.h>
@@ -38,18 +40,33 @@ TEST_GROUP(Handlebars);
 TEST_SETUP(Handlebars) {}
 TEST_TEAR_DOWN(Handlebars) {}
 
+static HbResult basic_key_handler(void* user_data __attribute__((unused)),
+    const char* key, const char** value)
+{
+    TEST_ASSERT_EQUAL_STRING("quick", key);
+    *value = "sneaky";
+    return HB_OK;
+}
+
 static const char* BASIC_TEST = "The {{quick}} brown fox";
 TEST(Handlebars, Basic) {
     HbInputContext* input = handlebars_input_context_from_string(BASIC_TEST);
     Handlebars* template = handlebars_template_load(input);
     TEST_ASSERT_NOT_NULL(template);
-    HbTemplateContext* context = handlebars_template_context_init();
-    handlebars_template_context_set_string(context, "quick", "sneaky");
-    HbString* output = handlebars_template_render(template, context);
-    TEST_ASSERT_EQUAL_STRING("The sneaky brown fox", output->string);
-    hb_string_free(&output);
-    handlebars_template_context_free(&context);
+
+    HbHandlers handlers = {
+        .key_handler = basic_key_handler,
+        .key_handler_data = NULL,
+    };
+    HbString* result = handlebars_template_render(template, &handlers);
+    TEST_ASSERT_NOT_NULL(result);
+    static const char* rendered_result = "The sneaky brown fox";
+    TEST_ASSERT_EQUAL_STRING(rendered_result, result->string);
+    TEST_ASSERT_EQUAL_INT(strlen(rendered_result), result->length);
+
+    hb_string_free(&result);
     handlebars_template_free(&template);
+    handlebars_input_context_free(&input);
 }
 
 TEST_GROUP_RUNNER(Handlebars) {

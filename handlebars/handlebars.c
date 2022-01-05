@@ -48,6 +48,49 @@ typedef struct Handlebars {
 } Handlebars;
 
 ///////////////////////////////////////////////////////////////////////////////
+// Private API
+////
+
+int priv_render_substitution(HbComponent* component, HbString* string,
+    HbHandlers* handlers)
+{
+    assert(NULL != handlers->key_handler);
+    const char* value = NULL;
+    HbString* key = (HbString*)component->argv->vector[0];
+
+    int result = handlers->key_handler(handlers->key_handler_data,
+        key->string, &value);
+    if (0 != result) {
+        return 1;
+    }
+
+    if (0 != hb_string_append_str(string, value)) {
+        return 1;
+    }
+    return 0;
+}
+
+int priv_render_component(HbComponent* component, HbString* result,
+    HbHandlers* handlers)
+{
+    switch (component->type) {
+    case HB_COMPONENT_TEXT:
+        return hb_string_append(result, component->text);
+
+    case HB_COMPONENT_EXPRESSION: {
+        if (1 == component->argv->length) {
+            return priv_render_substitution(component, result, handlers);
+        } else {
+            return 1;
+        }
+    }
+
+    default:
+        return HB_ERROR;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Public API
 ////
 
@@ -89,37 +132,20 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
 // the template contains expressions which don't match up to entries in the
 // context, those expressions are rendered as the empty string "".
 HbString* handlebars_template_render(Handlebars* template,
-    HbTemplateContext* context)
+    HbHandlers* handlers)
 {
     HbString* result = hb_string_init();
+
     HbNaryTreeIter iterator;
     hb_nary_tree_iter_init(&iterator, template->components);
     HbNaryNode* element = NULL;
-    HbComponent* component = NULL;
-    while (NULL != (element = hb_nary_tree_iter_next(&iterator)) &&
-        NULL != (component = (HbComponent*)hb_nary_node_get_data(element))) {
-        switch (component->type) {
-        case HB_COMPONENT_TEXT:
-            if (0 != hb_string_append(result, component->text)) {
-                hb_string_free(&result);
-                return NULL;
-            }
-            break;
-        case HB_COMPONENT_EXPRESSION: {
-            // Simple expression: Just substitute from context.
-            if (1 == component->argv->length) {
-                const HbString* value = handlebars_template_context_get(
-                    context, (HbString*)component->argv->vector[0]);
-                if (NULL == value) {
-                    break;
-                }
-                hb_string_append(result, value);
-            }
-            break;
-        }
-        default:
+    HbNaryNode* root = hb_nary_tree_get_root(template->components);
+
+    while (root != (element = hb_nary_tree_iter_next(&iterator))) {
+        HbComponent* component = hb_nary_node_get_data(element);
+        if (0 != priv_render_component(component, result, handlers)) {
             hb_string_free(&result);
-            assert(false);
+            return NULL;
         }
     }
 
