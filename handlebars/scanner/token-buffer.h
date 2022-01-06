@@ -7,7 +7,7 @@
 //
 // CREATED:         12/30/2021
 //
-// LAST EDITED:     12/30/2021
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -38,7 +38,7 @@ typedef struct TokenBuffer {
     size_t length;          // Number of items currently in the buffer
     size_t top;             // Array index pointing to current "top"
     size_t bottom;          // Array index pointing to current "bottom"
-    HbParseToken* buffer;   // Array of HbParseTokens.
+    HbsParseToken* buffer;   // Array of HbsParseTokens.
 } TokenBuffer;
 
 // Initialize a TokenBuffer at <buffer>.
@@ -48,13 +48,13 @@ int token_buffer_init(TokenBuffer* buffer, size_t buffer_length);
 void token_buffer_release(TokenBuffer* buffer);
 
 // Reserve a new slot in the ring buffer and return a pointer to it. This
-// allows in-place construction of HbParseTokens. Since we aim to set the size
+// allows in-place construction of HbsParseTokens. Since we aim to set the size
 // of this buffer never to overflow, just assert if overflow is detected.
-HbParseToken* token_buffer_reserve(TokenBuffer* buffer);
+HbsParseToken* token_buffer_reserve(TokenBuffer* buffer);
 
 // De-queue a token from the bottom of the buffer (return a pointer to it) and
 // move the cursor to the next token in the buffer.
-HbParseToken* token_buffer_dequeue(TokenBuffer* buffer);
+HbsParseToken* token_buffer_dequeue(TokenBuffer* buffer);
 
 #endif // HANDLEBARS_TOKEN_BUFFER_H
 

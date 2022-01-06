@@ -3,11 +3,11 @@
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Unit tests for the HbScanner.
+// DESCRIPTION:     Unit tests for the HbsScanner.
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/05/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -37,32 +37,32 @@
 #include <handlebars/handlebars.h>
 #include <handlebars/scanner.h>
 
-static HbInputContext* input_context;
-static HbScanner* scanner;
-static HbParseToken token;
+static HbsInputContext* input_context;
+static HbsScanner* scanner;
+static HbsParseToken token;
 
-TEST_GROUP(HbScanner);
-TEST_SETUP(HbScanner) {
+TEST_GROUP(HbsScanner);
+TEST_SETUP(HbsScanner) {
     input_context = NULL;
     scanner = NULL;
-    memset(&token, 0, sizeof(HbParseToken));
+    memset(&token, 0, sizeof(HbsParseToken));
 }
 
-TEST_TEAR_DOWN(HbScanner) {
+TEST_TEAR_DOWN(HbsScanner) {
     if (NULL != scanner) {
-        hb_scanner_free(scanner);
+        hbs_scanner_free(scanner);
     }
 }
 
 void scanner_token_verification_setup(const char* test_string) {
-    input_context = hb_input_context_from_string(test_string);
-    scanner = hb_scanner_new(input_context);
+    input_context = hbs_input_context_from_string(test_string);
+    scanner = hbs_scanner_new(input_context);
 }
 
-void scanner_token_compare(HbParseTokenType type, const char* string, int line,
+void scanner_token_compare(HbsParseTokenType type, const char* string, int line,
     int column)
 {
-    TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
+    TEST_ASSERT_EQUAL_INT(1, hbs_scanner_next_symbol(scanner, &token));
     TEST_ASSERT_EQUAL_INT(type, token.type);
 
     if (NULL != string) {
@@ -77,65 +77,65 @@ void scanner_token_compare(HbParseTokenType type, const char* string, int line,
         TEST_ASSERT_EQUAL_INT(column, token.column);
     }
 
-    hb_token_release(&token);
+    hbs_token_release(&token);
 }
 
 static const char* BASIC_TEST = "The quick brown fox jumped over the lazy dog";
-TEST(HbScanner, Basic) {
+TEST(HbsScanner, Basic) {
     scanner_token_verification_setup(BASIC_TEST);
-    scanner_token_compare(HB_TOKEN_TEXT, BASIC_TEST, 1, 0);
-    TEST_ASSERT_EQUAL_INT(1, hb_scanner_next_symbol(scanner, &token));
-    TEST_ASSERT_EQUAL_INT(HB_TOKEN_EOF, token.type);
+    scanner_token_compare(HBS_TOKEN_TEXT, BASIC_TEST, 1, 0);
+    TEST_ASSERT_EQUAL_INT(1, hbs_scanner_next_symbol(scanner, &token));
+    TEST_ASSERT_EQUAL_INT(HBS_TOKEN_EOF, token.type);
 }
 
 static const char* TOKEN_TEST = "Text {{ whitespace }}.";
-TEST(HbScanner, Token) {
+TEST(HbsScanner, Token) {
     scanner_token_verification_setup(TOKEN_TEST);
-    scanner_token_compare(HB_TOKEN_TEXT, "Text ", 1, 0);
-    scanner_token_compare(HB_TOKEN_OPEN_BARS, NULL, 1, 5);
-    scanner_token_compare(HB_TOKEN_TEXT, " whitespace ", 1, 7);
-    scanner_token_compare(HB_TOKEN_CLOSE_BARS, NULL, 1, 19);
-    scanner_token_compare(HB_TOKEN_TEXT, ".", 1, 21);
-    scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
+    scanner_token_compare(HBS_TOKEN_TEXT, "Text ", 1, 0);
+    scanner_token_compare(HBS_TOKEN_OPEN_BARS, NULL, 1, 5);
+    scanner_token_compare(HBS_TOKEN_TEXT, " whitespace ", 1, 7);
+    scanner_token_compare(HBS_TOKEN_CLOSE_BARS, NULL, 1, 19);
+    scanner_token_compare(HBS_TOKEN_TEXT, ".", 1, 21);
+    scanner_token_compare(HBS_TOKEN_EOF, NULL, -1, -1);
 }
 
 static const char* WHITESPACE_TEST = "Text {{ whitespace }}.";
-TEST(HbScanner, Whitespace) {
+TEST(HbsScanner, Whitespace) {
     scanner_token_verification_setup(WHITESPACE_TEST);
-    scanner_token_compare(HB_TOKEN_TEXT, "Text ", 1, 0);
-    scanner_token_compare(HB_TOKEN_OPEN_BARS, NULL, 1, 5);
-    hb_scanner_enable_ws_token(scanner);
-    scanner_token_compare(HB_TOKEN_WS, " ", 1, 7);
-    scanner_token_compare(HB_TOKEN_TEXT, "whitespace", 1, 8);
-    scanner_token_compare(HB_TOKEN_WS, " ", 1, 18);
-    hb_scanner_disable_ws_token(scanner);
-    scanner_token_compare(HB_TOKEN_CLOSE_BARS, NULL, 1, 19);
-    scanner_token_compare(HB_TOKEN_TEXT, ".", 1, 21);
-    scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
+    scanner_token_compare(HBS_TOKEN_TEXT, "Text ", 1, 0);
+    scanner_token_compare(HBS_TOKEN_OPEN_BARS, NULL, 1, 5);
+    hbs_scanner_enable_ws_token(scanner);
+    scanner_token_compare(HBS_TOKEN_WS, " ", 1, 7);
+    scanner_token_compare(HBS_TOKEN_TEXT, "whitespace", 1, 8);
+    scanner_token_compare(HBS_TOKEN_WS, " ", 1, 18);
+    hbs_scanner_disable_ws_token(scanner);
+    scanner_token_compare(HBS_TOKEN_CLOSE_BARS, NULL, 1, 19);
+    scanner_token_compare(HBS_TOKEN_TEXT, ".", 1, 21);
+    scanner_token_compare(HBS_TOKEN_EOF, NULL, -1, -1);
 }
 
 static const char* EOF_TEST = "";
-TEST(HbScanner, Eof) {
+TEST(HbsScanner, Eof) {
     scanner_token_verification_setup(EOF_TEST);
-    scanner_token_compare(HB_TOKEN_EOF, NULL, 1, 0);
+    scanner_token_compare(HBS_TOKEN_EOF, NULL, 1, 0);
 }
 
 static const char* DOUBLE_WHITESPACE = "Text  text";
-TEST(HbScanner, DoubleWhitespace) {
+TEST(HbsScanner, DoubleWhitespace) {
     scanner_token_verification_setup(DOUBLE_WHITESPACE);
-    hb_scanner_enable_ws_token(scanner);
-    scanner_token_compare(HB_TOKEN_TEXT, "Text", 1, 0);
-    scanner_token_compare(HB_TOKEN_WS, "  ", 1, 4);
-    scanner_token_compare(HB_TOKEN_TEXT, "text", 1, 6);
-    scanner_token_compare(HB_TOKEN_EOF, NULL, -1, -1);
+    hbs_scanner_enable_ws_token(scanner);
+    scanner_token_compare(HBS_TOKEN_TEXT, "Text", 1, 0);
+    scanner_token_compare(HBS_TOKEN_WS, "  ", 1, 4);
+    scanner_token_compare(HBS_TOKEN_TEXT, "text", 1, 6);
+    scanner_token_compare(HBS_TOKEN_EOF, NULL, -1, -1);
 }
 
-TEST_GROUP_RUNNER(HbScanner) {
-    RUN_TEST_CASE(HbScanner, Basic);
-    RUN_TEST_CASE(HbScanner, Token);
-    RUN_TEST_CASE(HbScanner, Whitespace);
-    RUN_TEST_CASE(HbScanner, Eof);
-    RUN_TEST_CASE(HbScanner, DoubleWhitespace);
+TEST_GROUP_RUNNER(HbsScanner) {
+    RUN_TEST_CASE(HbsScanner, Basic);
+    RUN_TEST_CASE(HbsScanner, Token);
+    RUN_TEST_CASE(HbsScanner, Whitespace);
+    RUN_TEST_CASE(HbsScanner, Eof);
+    RUN_TEST_CASE(HbsScanner, DoubleWhitespace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

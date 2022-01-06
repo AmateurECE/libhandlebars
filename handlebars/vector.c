@@ -7,7 +7,7 @@
 //
 // CREATED:         11/25/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -43,7 +43,7 @@ static const size_t DEFAULT_CAPACITY = 8;
 // Private API
 ////
 
-static int hb_priv_vector_extend(HbVector* first, size_t needed_capacity) {
+static int hbs_priv_vector_extend(HbsVector* first, size_t needed_capacity) {
     size_t new_capacity = first->capacity;
     while (new_capacity < needed_capacity)
         new_capacity *= 2;
@@ -64,8 +64,8 @@ static int hb_priv_vector_extend(HbVector* first, size_t needed_capacity) {
 // Public API
 ////
 
-HbVector* hb_vector_init() {
-    HbVector* vector = malloc(sizeof(HbVector));
+HbsVector* hbs_vector_init() {
+    HbsVector* vector = malloc(sizeof(HbsVector));
     if (NULL == vector) {
         return NULL;
     }
@@ -81,8 +81,8 @@ HbVector* hb_vector_init() {
     return vector;
 }
 
-int hb_vector_push_back(HbVector* vector, void* user_data) {
-    if (vector->length >= vector->capacity && hb_priv_vector_extend(vector,
+int hbs_vector_push_back(HbsVector* vector, void* user_data) {
+    if (vector->length >= vector->capacity && hbs_priv_vector_extend(vector,
             vector->length + 1)) {
         return 1;
     }
@@ -91,7 +91,7 @@ int hb_vector_push_back(HbVector* vector, void* user_data) {
     return 0;
 }
 
-void* hb_vector_pop_back(HbVector* vector) {
+void* hbs_vector_pop_back(HbsVector* vector) {
     if (0 == vector->length) {
         return NULL;
     }
@@ -102,12 +102,12 @@ void* hb_vector_pop_back(HbVector* vector) {
     return result;
 }
 
-int hb_vector_insert(HbVector* vector, size_t index, void* user_data) {
+int hbs_vector_insert(HbsVector* vector, size_t index, void* user_data) {
     if (index > vector->length) {
         return 1;
     }
 
-    if (vector->length >= vector->capacity && hb_priv_vector_extend(vector,
+    if (vector->length >= vector->capacity && hbs_priv_vector_extend(vector,
             vector->length + 1)) {
         return 2;
     }
@@ -121,7 +121,7 @@ int hb_vector_insert(HbVector* vector, size_t index, void* user_data) {
     return 0;
 }
 
-void hb_vector_free(HbVector** vector, void (*free_data)(void*)) {
+void hbs_vector_free(HbsVector** vector, void (*free_data)(void*)) {
     if (NULL == *vector) {
         return;
     }

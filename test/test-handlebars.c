@@ -7,7 +7,7 @@
 //
 // CREATED:         01/04/2022
 //
-// LAST EDITED:     01/05/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2022, Ethan D. Twardy
 //
@@ -36,41 +36,41 @@
 
 #include <handlebars/handlebars.h>
 
-TEST_GROUP(HbTemplate);
-TEST_SETUP(HbTemplate) {}
-TEST_TEAR_DOWN(HbTemplate) {}
+TEST_GROUP(HbsTemplate);
+TEST_SETUP(HbsTemplate) {}
+TEST_TEAR_DOWN(HbsTemplate) {}
 
-static HbResult basic_key_handler(void* user_data __attribute__((unused)),
+static HbsResult basic_key_handler(void* user_data __attribute__((unused)),
     const char* key, const char** value)
 {
     TEST_ASSERT_EQUAL_STRING("quick", key);
     *value = "sneaky";
-    return HB_OK;
+    return HBS_OK;
 }
 
 static const char* BASIC_TEST = "The {{quick}} brown fox";
-TEST(HbTemplate, Basic) {
-    HbInputContext* input = hb_input_context_from_string(BASIC_TEST);
-    HbTemplate* template = hb_template_load(input);
+TEST(HbsTemplate, Basic) {
+    HbsInputContext* input = hbs_input_context_from_string(BASIC_TEST);
+    HbsTemplate* template = hbs_template_load(input);
     TEST_ASSERT_NOT_NULL(template);
 
-    HbHandlers handlers = {
+    HbsHandlers handlers = {
         .key_handler = basic_key_handler,
         .key_handler_data = NULL,
     };
-    HbString* result = hb_template_render(template, &handlers);
+    HbsString* result = hbs_template_render(template, &handlers);
     TEST_ASSERT_NOT_NULL(result);
     static const char* rendered_result = "The sneaky brown fox";
     TEST_ASSERT_EQUAL_STRING(rendered_result, result->string);
     TEST_ASSERT_EQUAL_INT(strlen(rendered_result), result->length);
 
-    hb_string_free(&result);
-    hb_template_free(&template);
-    hb_input_context_free(&input);
+    hbs_string_free(&result);
+    hbs_template_free(&template);
+    hbs_input_context_free(&input);
 }
 
-TEST_GROUP_RUNNER(HbTemplate) {
-    RUN_TEST_CASE(HbTemplate, Basic);
+TEST_GROUP_RUNNER(HbsTemplate) {
+    RUN_TEST_CASE(HbsTemplate, Basic);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

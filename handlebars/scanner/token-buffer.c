@@ -7,7 +7,7 @@
 //
 // CREATED:         12/30/2021
 //
-// LAST EDITED:     12/30/2021
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -45,7 +45,7 @@
 // Initialize a TokenBuffer at <buffer>.
 int token_buffer_init(TokenBuffer* buffer, size_t buffer_length) {
     memset(buffer, 0, sizeof(TokenBuffer));
-    buffer->buffer = calloc(buffer_length, sizeof(HbParseToken));
+    buffer->buffer = calloc(buffer_length, sizeof(HbsParseToken));
     if (NULL == buffer->buffer) {
         return ENOMEM;
     }
@@ -59,11 +59,11 @@ void token_buffer_release(TokenBuffer* buffer)
 { free(buffer->buffer); }
 
 // Reserve a new slot in the ring buffer and return a pointer to it. This
-// allows in-place construction of HbParseTokens. Since we aim to set the size
+// allows in-place construction of HbsParseTokens. Since we aim to set the size
 // of this buffer never to overflow, just assert if overflow is detected.
-HbParseToken* token_buffer_reserve(TokenBuffer* buffer) {
+HbsParseToken* token_buffer_reserve(TokenBuffer* buffer) {
     assert(buffer->length < buffer->capacity);
-    HbParseToken* token = &buffer->buffer[buffer->top];
+    HbsParseToken* token = &buffer->buffer[buffer->top];
     buffer->length += 1;
     buffer->top = (buffer->top + 1) % buffer->capacity;
     return token;
@@ -71,12 +71,12 @@ HbParseToken* token_buffer_reserve(TokenBuffer* buffer) {
 
 // De-queue a token from the bottom of the buffer (return a pointer to it) and
 // move the cursor to the next token in the buffer.
-HbParseToken* token_buffer_dequeue(TokenBuffer* buffer) {
+HbsParseToken* token_buffer_dequeue(TokenBuffer* buffer) {
     if (0 == buffer->length) {
         return NULL;
     }
 
-    HbParseToken* token = &buffer->buffer[buffer->bottom];
+    HbsParseToken* token = &buffer->buffer[buffer->bottom];
     buffer->length -= 1;
     buffer->bottom = (buffer->bottom + 1) % buffer->capacity;
     return token;

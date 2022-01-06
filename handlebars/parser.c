@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/05/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -39,64 +39,64 @@
 #include <handlebars/scanner.h>
 #include <handlebars/vector.h>
 
-typedef struct HbParser {
-    HbVector* tokens;
-    HbScanner* scanner;
-    HbNaryNode* tree_top;
-} HbParser;
+typedef struct HbsParser {
+    HbsVector* tokens;
+    HbsScanner* scanner;
+    HbsNaryNode* tree_top;
+} HbsParser;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
 ////
 
 static void priv_parse_token_free(void* data) {
-    HbParseToken* token = (HbParseToken*)data;
-    hb_token_release(token);
+    HbsParseToken* token = (HbsParseToken*)data;
+    hbs_token_release(token);
     free(token);
 }
 
 static void priv_component_free(void* data) {
-    HbComponent* component = (HbComponent*)data;
+    HbsComponent* component = (HbsComponent*)data;
     if (NULL != component->text) {
-        hb_string_free(&component->text);
+        hbs_string_free(&component->text);
     }
     free(data);
 }
 
-static int priv_parse_text(HbParser* parser, HbNaryTree* component_tree) {
-    HbParseToken* parser_top = hb_vector_pop_back(parser->tokens);
-    assert(HB_TOKEN_TEXT == parser_top->type); // Programmer's error.
-    HbComponent* component = malloc(sizeof(HbComponent));
-    component->type = HB_COMPONENT_TEXT;
-    component->text = hb_string_init();
-    hb_string_append(component->text, parser_top->string);
-    HbNaryNode* node = hb_nary_node_new(component, priv_component_free);
-    hb_nary_tree_append_child_to_node(component_tree, parser->tree_top,
+static int priv_parse_text(HbsParser* parser, HbsNaryTree* component_tree) {
+    HbsParseToken* parser_top = hbs_vector_pop_back(parser->tokens);
+    assert(HBS_TOKEN_TEXT == parser_top->type); // Programmer's error.
+    HbsComponent* component = malloc(sizeof(HbsComponent));
+    component->type = HBS_COMPONENT_TEXT;
+    component->text = hbs_string_init();
+    hbs_string_append(component->text, parser_top->string);
+    HbsNaryNode* node = hbs_nary_node_new(component, priv_component_free);
+    hbs_nary_tree_append_child_to_node(component_tree, parser->tree_top,
         node);
     priv_parse_token_free(parser_top);
     return 0;
 }
 
-static int priv_parse_handlebars(HbParser* parser, HbNaryTree* tree) {
-    HbParseToken* parser_top = hb_vector_pop_back(parser->tokens);
-    assert(HB_TOKEN_CLOSE_BARS == parser_top->type); // Programmer's error.
+static int priv_parse_handlebars(HbsParser* parser, HbsNaryTree* tree) {
+    HbsParseToken* parser_top = hbs_vector_pop_back(parser->tokens);
+    assert(HBS_TOKEN_CLOSE_BARS == parser_top->type); // Programmer's error.
 
-    HbComponent* component = malloc(sizeof(HbComponent));
+    HbsComponent* component = malloc(sizeof(HbsComponent));
     if (NULL == component) {
         return 1;
     }
 
     int result = 0;
-    component->type = HB_COMPONENT_EXPRESSION;
-    component->argv = hb_vector_init();
-    while (HB_TOKEN_OPEN_BARS != parser_top->type) {
-        hb_token_release(parser_top);
-        parser_top = hb_vector_pop_back(parser->tokens);
-        if (HB_TOKEN_TEXT == parser_top->type) {
-            HbString* argument = hb_string_init();
-            hb_string_append(argument, parser_top->string);
-            hb_vector_insert(component->argv, 0, argument);
-        } else if (HB_TOKEN_OPEN_BARS == parser_top->type) {
+    component->type = HBS_COMPONENT_EXPRESSION;
+    component->argv = hbs_vector_init();
+    while (HBS_TOKEN_OPEN_BARS != parser_top->type) {
+        hbs_token_release(parser_top);
+        parser_top = hbs_vector_pop_back(parser->tokens);
+        if (HBS_TOKEN_TEXT == parser_top->type) {
+            HbsString* argument = hbs_string_init();
+            hbs_string_append(argument, parser_top->string);
+            hbs_vector_insert(component->argv, 0, argument);
+        } else if (HBS_TOKEN_OPEN_BARS == parser_top->type) {
             // As long as there was more than one text token between the
             // open token and close token, this is a valid expression.
             if (0 == component->argv->length) {
@@ -107,30 +107,30 @@ static int priv_parse_handlebars(HbParser* parser, HbNaryTree* tree) {
         }
     }
 
-    hb_token_release(parser_top);
-    HbNaryNode* node = hb_nary_node_new(component, priv_component_free);
-    hb_nary_tree_append_child_to_node(tree, parser->tree_top, node);
+    hbs_token_release(parser_top);
+    HbsNaryNode* node = hbs_nary_node_new(component, priv_component_free);
+    hbs_nary_tree_append_child_to_node(tree, parser->tree_top, node);
     return result;
 }
 
-static int priv_rule_handlebars(HbParser* parser, HbNaryTree* component_tree) {
+static int priv_rule_handlebars(HbsParser* parser, HbsNaryTree* component_tree) {
     int result = 1;
-    HbParseToken* parser_top = malloc(sizeof(HbParseToken));
+    HbsParseToken* parser_top = malloc(sizeof(HbsParseToken));
     if (NULL == parser_top) {
         return 1;
     }
 
-    hb_vector_push_back(parser->tokens, parser_top);
-    hb_scanner_next_symbol(parser->scanner, parser_top);
-    if (HB_TOKEN_TEXT == parser_top->type) {
+    hbs_vector_push_back(parser->tokens, parser_top);
+    hbs_scanner_next_symbol(parser->scanner, parser_top);
+    if (HBS_TOKEN_TEXT == parser_top->type) {
         result = priv_rule_handlebars(parser, component_tree);
-    } else if (HB_TOKEN_CLOSE_BARS == parser_top->type) {
+    } else if (HBS_TOKEN_CLOSE_BARS == parser_top->type) {
         result = priv_parse_handlebars(parser, component_tree);
-    } else if (HB_TOKEN_WS == parser_top->type) {
+    } else if (HBS_TOKEN_WS == parser_top->type) {
         // Pop this token from the stack and recurse
-        HbParseToken* ws_token = hb_vector_pop_back(parser->tokens);
+        HbsParseToken* ws_token = hbs_vector_pop_back(parser->tokens);
         assert(ws_token == parser_top);
-        hb_token_release(parser_top);
+        hbs_token_release(parser_top);
         result = priv_rule_handlebars(parser, component_tree);
     } else {
         // TODO: Better error handling here
@@ -139,22 +139,22 @@ static int priv_rule_handlebars(HbParser* parser, HbNaryTree* component_tree) {
     return result;
 }
 
-static int priv_rule_expression(HbParser* parser, HbNaryTree* component_tree) {
-    HbParseToken* parser_top = malloc(sizeof(HbParseToken));
+static int priv_rule_expression(HbsParser* parser, HbsNaryTree* component_tree) {
+    HbsParseToken* parser_top = malloc(sizeof(HbsParseToken));
     if (NULL == parser_top) {
         return 1;
     }
 
     int result = 1;
-    hb_vector_push_back(parser->tokens, parser_top);
-    hb_scanner_next_symbol(parser->scanner, parser_top);
-    if (HB_TOKEN_TEXT == parser_top->type) {
+    hbs_vector_push_back(parser->tokens, parser_top);
+    hbs_scanner_next_symbol(parser->scanner, parser_top);
+    if (HBS_TOKEN_TEXT == parser_top->type) {
         result = priv_parse_text(parser, component_tree);
-    } else if (HB_TOKEN_OPEN_BARS == parser_top->type) {
-        hb_scanner_enable_ws_token(parser->scanner);
+    } else if (HBS_TOKEN_OPEN_BARS == parser_top->type) {
+        hbs_scanner_enable_ws_token(parser->scanner);
         result = priv_rule_handlebars(parser, component_tree);
-        hb_scanner_disable_ws_token(parser->scanner);
-    } else if (HB_TOKEN_EOF == parser_top->type) {
+        hbs_scanner_disable_ws_token(parser->scanner);
+    } else if (HBS_TOKEN_EOF == parser_top->type) {
         result = 0; // Do nothing, but especially don't error. EOF is valid.
     } else {
         // TODO: Some kind of error logging here.
@@ -170,14 +170,14 @@ static int priv_rule_expression(HbParser* parser, HbNaryTree* component_tree) {
 
 // Create a new handlebars parser, injecting the scanner. The parser takes
 // ownership of and is responsible for freeing the scanner.
-HbParser* hb_parser_new(HbScanner* scanner) {
-    HbParser* parser = malloc(sizeof(HbParser));
+HbsParser* hbs_parser_new(HbsScanner* scanner) {
+    HbsParser* parser = malloc(sizeof(HbsParser));
     if (NULL == parser) {
         return NULL;
     }
 
     parser->scanner = scanner;
-    parser->tokens = hb_vector_init();
+    parser->tokens = hbs_vector_init();
     if (NULL == parser->tokens) {
         free(parser);
         return NULL;
@@ -187,41 +187,42 @@ HbParser* hb_parser_new(HbScanner* scanner) {
 }
 
 // Free the parser and all associated internal memory.
-void hb_parser_free(HbParser* parser) {
-    hb_vector_free(&parser->tokens, priv_parse_token_free);
-    hb_scanner_free(parser->scanner);
+void hbs_parser_free(HbsParser* parser) {
+    hbs_vector_free(&parser->tokens, priv_parse_token_free);
+    hbs_scanner_free(parser->scanner);
     free(parser);
 }
 
 // The parser's job is to construct an Abstract Syntax Tree from the input
 // text. The AST is then a direct input to the rendering logic, which performs
 // reduce operations in a bottom-up fashion. This function increases the
-// reference count on the HbNaryTree which forms the internal representation of
-// the AST and returns it. If the parser exited successfully, zero is returned.
+// reference count on the HbsNaryTree which forms the internal representation
+// of the AST and returns it. If the parser exited successfully, zero is
+// returned.
 // NOTE that the AST returned by this function is NOT the parse tree, but is
 // instead a simplified AST optimized for template rendering. Additionally, the
 // returned tree is allocated memory, which much be released using
-// hb_nary_tree_free().
-int hb_parser_parse(HbParser* parser, HbNaryTree** component_tree) {
+// hbs_nary_tree_free().
+int hbs_parser_parse(HbsParser* parser, HbsNaryTree** component_tree) {
     int result = 0;
-    *component_tree = hb_nary_tree_new();
+    *component_tree = hbs_nary_tree_new();
     if (NULL == *component_tree) {
         return 1;
     }
 
-    HbNaryNode* node = hb_nary_node_new(NULL, NULL);
+    HbsNaryNode* node = hbs_nary_node_new(NULL, NULL);
     if (NULL == node) {
-        hb_nary_tree_free(component_tree);
+        hbs_nary_tree_free(component_tree);
         return 1;
     }
-    hb_nary_tree_set_root(*component_tree, node);
+    hbs_nary_tree_set_root(*component_tree, node);
     parser->tree_top = node;
 
-    HbParseToken* top = NULL;
+    HbsParseToken* top = NULL;
     do {
         int parse_result = priv_rule_expression(parser, *component_tree);
         if (0 != parse_result) {
-            hb_nary_tree_free(component_tree);
+            hbs_nary_tree_free(component_tree);
             return 1;
         }
 
@@ -231,7 +232,7 @@ int hb_parser_parse(HbParser* parser, HbNaryTree** component_tree) {
             // a bad access.
             top = parser->tokens->vector[parser->tokens->length - 1];
         }
-    } while (NULL == top || HB_TOKEN_EOF != top->type);
+    } while (NULL == top || HBS_TOKEN_EOF != top->type);
 
     return result;
 }

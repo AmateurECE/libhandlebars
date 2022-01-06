@@ -4,12 +4,12 @@
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
 // DESCRIPTION:     Interface that allows reading a single char at a time from
-//                  an HbInputContext and peeking up to two chars ahead of the
+//                  an HbsInputContext and peeking up to two chars ahead of the
 //                  cursor.
 //
 // CREATED:         12/30/2021
 //
-// LAST EDITED:     01/02/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -37,12 +37,12 @@
 
 #include <stddef.h>
 
-typedef struct HbInputContext HbInputContext;
+typedef struct HbsInputContext HbsInputContext;
 
 typedef struct CharStream {
     // Provides a stream of input characters. May be buffered, but it doesn't
     // really matter.
-    HbInputContext* input_context;
+    HbsInputContext* input_context;
 
     // Buffered stream state.
     char* buffer;
@@ -56,7 +56,7 @@ typedef struct CharStream {
 // that is, allow peeking at chars up to `<peek_buffer> - 1` positions ahead of
 // the cursor. Will assert if <peek_length> is greater than <capacity>.
 void char_stream_init(CharStream* stream, size_t capacity, size_t peek_buffer,
-    HbInputContext* input_context);
+    HbsInputContext* input_context);
 
 // Release internal memory held by the CharStream.
 void char_stream_release(CharStream* stream);

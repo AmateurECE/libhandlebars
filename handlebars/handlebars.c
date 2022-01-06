@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     01/05/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -43,20 +43,20 @@
 
 // This struct contains context necessary to parse the template and render it
 // using context.
-typedef struct HbTemplate {
-    HbNaryTree* components;
-} HbTemplate;
+typedef struct HbsTemplate {
+    HbsNaryTree* components;
+} HbsTemplate;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
 ////
 
-int priv_render_substitution(HbComponent* component, HbString* string,
-    HbHandlers* handlers)
+int priv_render_substitution(HbsComponent* component, HbsString* string,
+    HbsHandlers* handlers)
 {
     assert(NULL != handlers->key_handler);
     const char* value = NULL;
-    HbString* key = (HbString*)component->argv->vector[0];
+    HbsString* key = (HbsString*)component->argv->vector[0];
 
     int result = handlers->key_handler(handlers->key_handler_data,
         key->string, &value);
@@ -64,20 +64,20 @@ int priv_render_substitution(HbComponent* component, HbString* string,
         return 1;
     }
 
-    if (0 != hb_string_append_str(string, value)) {
+    if (0 != hbs_string_append_str(string, value)) {
         return 1;
     }
     return 0;
 }
 
-int priv_render_component(HbComponent* component, HbString* result,
-    HbHandlers* handlers)
+int priv_render_component(HbsComponent* component, HbsString* result,
+    HbsHandlers* handlers)
 {
     switch (component->type) {
-    case HB_COMPONENT_TEXT:
-        return hb_string_append(result, component->text);
+    case HBS_COMPONENT_TEXT:
+        return hbs_string_append(result, component->text);
 
-    case HB_COMPONENT_EXPRESSION: {
+    case HBS_COMPONENT_EXPRESSION: {
         if (1 == component->argv->length) {
             return priv_render_substitution(component, result, handlers);
         } else {
@@ -86,7 +86,7 @@ int priv_render_component(HbComponent* component, HbString* result,
     }
 
     default:
-        return HB_ERROR;
+        return HBS_ERROR;
     }
 }
 
@@ -98,28 +98,28 @@ int priv_render_component(HbComponent* component, HbString* result,
 // a file, this function will construct the template components from the
 // contents of that file as it is on disk currently. The template is not
 // reloaded every time the template is rendered (unless explicitly done so).
-HbTemplate* hb_template_load(HbInputContext* input_context) {
-    HbTemplate* template = malloc(sizeof(HbTemplate));
+HbsTemplate* hbs_template_load(HbsInputContext* input_context) {
+    HbsTemplate* template = malloc(sizeof(HbsTemplate));
     if (NULL == template) {
         return NULL;
     }
 
-    HbScanner* scanner = hb_scanner_new(input_context);
+    HbsScanner* scanner = hbs_scanner_new(input_context);
     if (NULL == scanner) {
         free(template);
         return NULL;
     }
-    HbParser* parser = hb_parser_new(scanner);
+    HbsParser* parser = hbs_parser_new(scanner);
     if (NULL == parser) {
-        hb_scanner_free(scanner);
+        hbs_scanner_free(scanner);
         free(template);
         return NULL;
     }
 
-    memset(template, 0, sizeof(HbTemplate));
-    int parse_result = hb_parser_parse(parser, &template->components);
+    memset(template, 0, sizeof(HbsTemplate));
+    int parse_result = hbs_parser_parse(parser, &template->components);
     if (0 != parse_result) {
-        hb_parser_free(parser);
+        hbs_parser_free(parser);
         free(template);
         return NULL;
     }
@@ -131,20 +131,20 @@ HbTemplate* hb_template_load(HbInputContext* input_context) {
 // all context data and helpers (with the exception of the default helpers). If
 // the template contains expressions which don't match up to entries in the
 // context, those expressions are rendered as the empty string "".
-HbString* hb_template_render(HbTemplate* template,
-    HbHandlers* handlers)
+HbsString* hbs_template_render(HbsTemplate* template,
+    HbsHandlers* handlers)
 {
-    HbString* result = hb_string_init();
+    HbsString* result = hbs_string_init();
 
-    HbNaryTreeIter iterator;
-    hb_nary_tree_iter_init(&iterator, template->components);
-    HbNaryNode* element = NULL;
-    HbNaryNode* root = hb_nary_tree_get_root(template->components);
+    HbsNaryTreeIter iterator;
+    hbs_nary_tree_iter_init(&iterator, template->components);
+    HbsNaryNode* element = NULL;
+    HbsNaryNode* root = hbs_nary_tree_get_root(template->components);
 
-    while (root != (element = hb_nary_tree_iter_next(&iterator))) {
-        HbComponent* component = hb_nary_node_get_data(element);
+    while (root != (element = hbs_nary_tree_iter_next(&iterator))) {
+        HbsComponent* component = hbs_nary_node_get_data(element);
         if (0 != priv_render_component(component, result, handlers)) {
-            hb_string_free(&result);
+            hbs_string_free(&result);
             return NULL;
         }
     }
@@ -154,10 +154,10 @@ HbString* hb_template_render(HbTemplate* template,
 
 // Free the template components, relinquishing all allocated memory back to the
 // system.
-void hb_template_free(HbTemplate** template) {
+void hbs_template_free(HbsTemplate** template) {
     if (NULL != *template) {
         if (NULL != (*template)->components) {
-            hb_nary_tree_free(&(*template)->components);
+            hbs_nary_tree_free(&(*template)->components);
         }
 
         free(*template);

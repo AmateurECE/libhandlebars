@@ -7,7 +7,7 @@
 //
 // CREATED:         11/21/2021
 //
-// LAST EDITED:     01/05/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -34,18 +34,18 @@
 
 #include <handlebars/handlebars.h>
 
-typedef struct HbStringInput {
+typedef struct HbsStringInput {
     const char* string;
     size_t position;
-} HbStringInput;
+} HbsStringInput;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
 ////
 
-size_t hb_priv_read_string(void* data, char* buffer, size_t buffer_size)
+size_t hbs_priv_read_string(void* data, char* buffer, size_t buffer_size)
 {
-    HbStringInput* input = (HbStringInput*)data;
+    HbsStringInput* input = (HbsStringInput*)data;
     if ('\0' == input->string[input->position]) {
         return 0;
     }
@@ -64,15 +64,15 @@ size_t hb_priv_read_string(void* data, char* buffer, size_t buffer_size)
 // Public API
 ////
 
-HbInputContext* hb_input_context_from_file(const char* filename);
+HbsInputContext* hbs_input_context_from_file(const char* filename);
 
-HbInputContext* hb_input_context_from_string(const char* string) {
-    HbInputContext* context = malloc(sizeof(HbInputContext));
+HbsInputContext* hbs_input_context_from_string(const char* string) {
+    HbsInputContext* context = malloc(sizeof(HbsInputContext));
     if (NULL == context) {
         return NULL;
     }
 
-    HbStringInput* input = malloc(sizeof(HbStringInput));
+    HbsStringInput* input = malloc(sizeof(HbsStringInput));
     if (NULL == input) {
         free(context);
         return NULL;
@@ -82,11 +82,11 @@ HbInputContext* hb_input_context_from_string(const char* string) {
     input->position = 0;
     context->data = input;
     context->free_data = free;
-    context->read = hb_priv_read_string;
+    context->read = hbs_priv_read_string;
     return context;
 }
 
-void hb_input_context_free(HbInputContext** input_context) {
+void hbs_input_context_free(HbsInputContext** input_context) {
     if (NULL != *input_context) {
         if (NULL != (*input_context)->free_data) {
             (*input_context)->free_data((*input_context)->data);

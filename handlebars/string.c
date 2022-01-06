@@ -7,7 +7,7 @@
 //
 // CREATED:         11/22/2021
 //
-// LAST EDITED:     11/25/2021
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -43,7 +43,7 @@ static const size_t DEFAULT_CAPACITY = 64;
 // Private API
 ////
 
-static int hb_priv_string_extend(HbString* first, size_t needed_capacity) {
+static int hbs_priv_string_extend(HbsString* first, size_t needed_capacity) {
     size_t new_capacity = first->capacity;
     while (new_capacity < needed_capacity)
         new_capacity *= 2;
@@ -64,8 +64,8 @@ static int hb_priv_string_extend(HbString* first, size_t needed_capacity) {
 // Public API
 ////
 
-HbString* hb_string_init() {
-    HbString* string = malloc(sizeof(HbString));
+HbsString* hbs_string_init() {
+    HbsString* string = malloc(sizeof(HbsString));
     if (NULL == string) {
         return NULL;
     }
@@ -81,29 +81,29 @@ HbString* hb_string_init() {
     return string;
 }
 
-HbString* hb_string_from_str(const char* content) {
-    HbString* string = hb_string_init();
+HbsString* hbs_string_from_str(const char* content) {
+    HbsString* string = hbs_string_init();
     if (NULL == string) {
         return NULL;
     }
 
-    if (0 != hb_string_append_str(string, content)) {
+    if (0 != hbs_string_append_str(string, content)) {
         free(string);
         return NULL;
     }
     return string;
 }
 
-int hb_string_append(HbString* first, const HbString* second) {
-    return hb_string_append_str(first, second->string);
+int hbs_string_append(HbsString* first, const HbsString* second) {
+    return hbs_string_append_str(first, second->string);
 }
 
-int hb_string_append_str(HbString* first, const char* second)
+int hbs_string_append_str(HbsString* first, const char* second)
 {
     const size_t append_length = strlen(second);
     const size_t needed_capacity = append_length + first->length + 1;
     if (needed_capacity > first->capacity) {
-        if (0 != hb_priv_string_extend(first, needed_capacity)) {
+        if (0 != hbs_priv_string_extend(first, needed_capacity)) {
             return 1;
         }
     }
@@ -114,7 +114,7 @@ int hb_string_append_str(HbString* first, const char* second)
     return 0;
 }
 
-void hb_string_free(HbString** string) {
+void hbs_string_free(HbsString** string) {
     if (NULL != *string) {
         free((*string)->string);
         free(*string);

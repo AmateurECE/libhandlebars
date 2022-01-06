@@ -8,7 +8,7 @@
 //
 // CREATED:         12/28/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -35,48 +35,48 @@
 #define HANDLEBARS_PARSER_H
 
 // Opaque typedef for the parser.
-typedef struct HbParser HbParser;
+typedef struct HbsParser HbsParser;
 
 // Forward declarations
-typedef struct HbNaryTree HbNaryTree;
-typedef struct HbScanner HbScanner;
-typedef struct HbString HbString;
-typedef struct HbVector HbVector;
+typedef struct HbsNaryTree HbsNaryTree;
+typedef struct HbsScanner HbsScanner;
+typedef struct HbsString HbsString;
+typedef struct HbsVector HbsVector;
 
-typedef enum HbComponentType {
+typedef enum HbsComponentType {
     // Text (forming the stuff around the template exprs.)
-    HB_COMPONENT_TEXT,
+    HBS_COMPONENT_TEXT,
 
     // Substitution (e.g. "{{sometext}}", where "sometext" is a recognized key
     // in the template context.
-    HB_COMPONENT_EXPRESSION,
-} HbComponentType;
+    HBS_COMPONENT_EXPRESSION,
+} HbsComponentType;
 
-typedef struct HbComponent {
-    HbComponentType type;
+typedef struct HbsComponent {
+    HbsComponentType type;
     union {
-        HbString* text; // Text for HB_COMPONENT_TEXT
-        HbVector* argv; // Arguments for a handlebars expression
+        HbsString* text; // Text for HBS_COMPONENT_TEXT
+        HbsVector* argv; // Arguments for a handlebars expression
     };
-} HbComponent;
+} HbsComponent;
 
 // Create a new handlebars parser, injecting the scanner. The parser takes
 // ownership of and is responsible for freeing the scanner.
-HbParser* hb_parser_new(HbScanner* scanner);
+HbsParser* hbs_parser_new(HbsScanner* scanner);
 
 // Free the parser and all associated internal memory.
-void hb_parser_free(HbParser* parser);
+void hbs_parser_free(HbsParser* parser);
 
 // The parser's job is to construct an Abstract Syntax Tree from the input
 // text. The AST is then a direct input to the rendering logic, which performs
 // reduce operations in a bottom-up fashion. This function increases the
-// reference count on the HbNaryTree which forms the internal representation of
+// reference count on the HbsNaryTree which forms the internal representation of
 // the AST and returns it. If the parser exited successfully, zero is returned.
 // NOTE that the AST returned by this function is NOT the parse tree, but is
 // instead a simplified AST optimized for template rendering. Additionally, the
 // returned tree is allocated memory, which much be released using
-// hb_nary_tree_free().
-int hb_parser_parse(HbParser* parser, HbNaryTree** component_tree);
+// hbs_nary_tree_free().
+int hbs_parser_parse(HbsParser* parser, HbsNaryTree** component_tree);
 
 #endif // HANDLEBARS_PARSER_H
 

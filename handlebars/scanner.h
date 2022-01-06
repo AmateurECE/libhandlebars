@@ -7,7 +7,7 @@
 //
 // CREATED:         12/28/2021
 //
-// LAST EDITED:     12/29/2021
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -33,35 +33,35 @@
 #ifndef HANDLEBARS_SCANNER_H
 #define HANDLEBARS_SCANNER_H
 
-// Opaque typedef of the HbScanner type.
-typedef struct HbScanner HbScanner;
+// Opaque typedef of the HbsScanner type.
+typedef struct HbsScanner HbsScanner;
 
 // Forward declarations.
-typedef struct HbInputContext HbInputContext;
-typedef struct HbString HbString;
+typedef struct HbsInputContext HbsInputContext;
+typedef struct HbsString HbsString;
 
 // Valid parser tokens.
-typedef enum HbParseTokenType {
-    HB_TOKEN_NULL,          // '\0', or a named constant to signal no token
-    HB_TOKEN_OPEN_BARS,     // "{{"
-    HB_TOKEN_CLOSE_BARS,    // "}}"
+typedef enum HbsParseTokenType {
+    HBS_TOKEN_NULL,          // '\0', or a named constant to signal no token
+    HBS_TOKEN_OPEN_BARS,     // "{{"
+    HBS_TOKEN_CLOSE_BARS,    // "}}"
 
     // This token is generated whenever interesting text is discovered. If the
     // ws token is enabled, this token is generated for word input, i.e. [\w]+,
     // but is more akin to .+ whenever the ws token is disabled.
-    HB_TOKEN_TEXT,
+    HBS_TOKEN_TEXT,
 
     // This token may or may not be generated, based on the value of an
     // internal boolean, which can be enabled or disabled with the *_ws_token
     // functions. See their description for more info.
-    HB_TOKEN_WS,            // [ \t\n]*
+    HBS_TOKEN_WS,            // [ \t\n]*
 
-    HB_TOKEN_EOF, // End of file (or stream)
-} HbParseTokenType;
+    HBS_TOKEN_EOF, // End of file (or stream)
+} HbsParseTokenType;
 
 // Structure of a token event.
-typedef struct HbParseToken {
-    HbParseTokenType type;      // Type of the token
+typedef struct HbsParseToken {
+    HbsParseTokenType type;      // Type of the token
 
     // The line number and column number in the input that marks the start of
     // the token.
@@ -69,11 +69,11 @@ typedef struct HbParseToken {
     int column;
 
     // String representing
-    HbString* string;
-} HbParseToken;
+    HbsString* string;
+} HbsParseToken;
 
-// Create a new HbScanner.
-HbScanner* hb_scanner_new(HbInputContext* input_context);
+// Create a new HbsScanner.
+HbsScanner* hbs_scanner_new(HbsInputContext* input_context);
 
 // These functions enable or disable the "whitespace" token. When we're not
 // parsing a handlebars expression, whitespace is signifigcant, so we want it
@@ -81,21 +81,21 @@ HbScanner* hb_scanner_new(HbInputContext* input_context);
 // parser to notify it of whitespace. This was an interesting design choice
 // aimed at simplifying the logic of the scanner at the expense of a slightly
 // more complex interface.
-void hb_scanner_disable_ws_token(HbScanner* scanner);
-void hb_scanner_enable_ws_token(HbScanner* scanner);
+void hbs_scanner_disable_ws_token(HbsScanner* scanner);
+void hbs_scanner_enable_ws_token(HbsScanner* scanner);
 
 // Populate <token> with the next token from the stream. Return the number of
 // tokens processed (i.e. 1 for a successful scan).
-int hb_scanner_next_symbol(HbScanner* scanner, HbParseToken* token);
+int hbs_scanner_next_symbol(HbsScanner* scanner, HbsParseToken* token);
 
 // Free internal memory assocaited with the scanner.
-void hb_scanner_free(HbScanner* scanner);
+void hbs_scanner_free(HbsScanner* scanner);
 
 // Return a string describing the Parser token type (for debugging purposes)
-const char* hb_token_to_string(HbParseTokenType type);
+const char* hbs_token_to_string(HbsParseTokenType type);
 
 // Release internal memory held by <token>.
-void hb_token_release(HbParseToken* token);
+void hbs_token_release(HbsParseToken* token);
 
 #endif // HANDLEBARS_SCANNER_H
 

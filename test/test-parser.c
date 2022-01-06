@@ -7,7 +7,7 @@
 //
 // CREATED:         01/03/2022
 //
-// LAST EDITED:     01/05/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2022, Ethan D. Twardy
 //
@@ -38,78 +38,78 @@
 #include <handlebars/scanner.h>
 #include <handlebars/vector.h>
 
-static HbInputContext* input_context;
-static HbScanner* scanner;
-static HbParser* parser;
-static HbNaryTree* tree;
+static HbsInputContext* input_context;
+static HbsScanner* scanner;
+static HbsParser* parser;
+static HbsNaryTree* tree;
 
-TEST_GROUP(HbParser);
+TEST_GROUP(HbsParser);
 
-TEST_SETUP(HbParser) {
+TEST_SETUP(HbsParser) {
     tree = NULL;
 }
-TEST_TEAR_DOWN(HbParser) {}
+TEST_TEAR_DOWN(HbsParser) {}
 
 static void parser_verification_setup(const char* string) {
-    input_context = hb_input_context_from_string(string);
-    scanner = hb_scanner_new(input_context);
-    parser = hb_parser_new(scanner);
+    input_context = hbs_input_context_from_string(string);
+    scanner = hbs_scanner_new(input_context);
+    parser = hbs_parser_new(scanner);
 }
 
-static void parser_check_text_component(HbNaryTreeIter* iterator,
+static void parser_check_text_component(HbsNaryTreeIter* iterator,
     const char* string)
 {
-    HbNaryNode* element = hb_nary_tree_iter_next(iterator);
+    HbsNaryNode* element = hbs_nary_tree_iter_next(iterator);
     TEST_ASSERT_NOT_NULL(element);
-    HbComponent* component = (HbComponent*)hb_nary_node_get_data(element);
+    HbsComponent* component = (HbsComponent*)hbs_nary_node_get_data(element);
     TEST_ASSERT_NOT_NULL(component);
-    TEST_ASSERT_EQUAL_INT(HB_COMPONENT_TEXT, component->type);
+    TEST_ASSERT_EQUAL_INT(HBS_COMPONENT_TEXT, component->type);
     TEST_ASSERT_NOT_NULL(component->text);
     TEST_ASSERT_EQUAL_STRING(string, component->text->string);
 }
 
-static void parser_check_expression_component(HbNaryTreeIter* iterator,
+static void parser_check_expression_component(HbsNaryTreeIter* iterator,
     const size_t length, const char* argv[length])
 {
-    HbNaryNode* element = hb_nary_tree_iter_next(iterator);
+    HbsNaryNode* element = hbs_nary_tree_iter_next(iterator);
     TEST_ASSERT_NOT_NULL(element);
-    HbComponent* component = (HbComponent*)hb_nary_node_get_data(element);
+    HbsComponent* component = (HbsComponent*)hbs_nary_node_get_data(element);
     TEST_ASSERT_NOT_NULL(component);
-    TEST_ASSERT_EQUAL_INT(HB_COMPONENT_EXPRESSION, component->type);
+    TEST_ASSERT_EQUAL_INT(HBS_COMPONENT_EXPRESSION, component->type);
     TEST_ASSERT_NOT_NULL(component->argv);
     TEST_ASSERT_EQUAL_INT(length, component->argv->length);
     for (size_t i = 0; i < length; ++i) {
-        HbString* argument = (HbString*)component->argv->vector[i];
+        HbsString* argument = (HbsString*)component->argv->vector[i];
         TEST_ASSERT_EQUAL_STRING(argv[i], argument->string);
     }
 }
 
-static void parser_check_root(HbNaryTreeIter* iterator) {
-    HbNaryNode* element = hb_nary_tree_iter_next(iterator);
-    HbNaryNode* root = hb_nary_tree_get_root(tree);
+static void parser_check_root(HbsNaryTreeIter* iterator) {
+    HbsNaryNode* element = hbs_nary_tree_iter_next(iterator);
+    HbsNaryNode* root = hbs_nary_tree_get_root(tree);
     TEST_ASSERT_EQUAL(element, root);
 }
 
 static const char* TEXT_TEST = "The quick brown fox";
-TEST(HbParser, Text) {
+TEST(HbsParser, Text) {
     parser_verification_setup(TEXT_TEST);
-    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(0, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NOT_NULL(tree);
 
-    HbNaryTreeIter iterator;
-    hb_nary_tree_iter_init(&iterator, tree);
+    HbsNaryTreeIter iterator;
+    hbs_nary_tree_iter_init(&iterator, tree);
     parser_check_text_component(&iterator, TEXT_TEST);
     parser_check_root(&iterator);
 }
 
 static const char* HANDLEBARS_TEST = "{{test}}";
-TEST(HbParser, Handlebars) {
+TEST(HbsParser, Handlebars) {
     parser_verification_setup(HANDLEBARS_TEST);
-    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(0, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NOT_NULL(tree);
 
-    HbNaryTreeIter iterator;
-    hb_nary_tree_iter_init(&iterator, tree);
+    HbsNaryTreeIter iterator;
+    hbs_nary_tree_iter_init(&iterator, tree);
     static const char* argv[] = {"test"};
     parser_check_expression_component(&iterator,
         sizeof(argv) / sizeof(argv[0]), argv);
@@ -117,13 +117,13 @@ TEST(HbParser, Handlebars) {
 }
 
 static const char* COMBINATION_TEST = "The {{quick}} brown fox";
-TEST(HbParser, Combination) {
+TEST(HbsParser, Combination) {
     parser_verification_setup(COMBINATION_TEST);
-    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(0, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NOT_NULL(tree);
 
-    HbNaryTreeIter iterator;
-    hb_nary_tree_iter_init(&iterator, tree);
+    HbsNaryTreeIter iterator;
+    hbs_nary_tree_iter_init(&iterator, tree);
     parser_check_text_component(&iterator, "The ");
     static const char* argv[] = {"quick"};
     parser_check_expression_component(&iterator,
@@ -133,13 +133,13 @@ TEST(HbParser, Combination) {
 }
 
 static const char* MULTIPLE_TEST = "{{test1 test2}}";
-TEST(HbParser, Multiple) {
+TEST(HbsParser, Multiple) {
     parser_verification_setup(MULTIPLE_TEST);
-    TEST_ASSERT_EQUAL_INT(0, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(0, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NOT_NULL(tree);
 
-    HbNaryTreeIter iterator;
-    hb_nary_tree_iter_init(&iterator, tree);
+    HbsNaryTreeIter iterator;
+    hbs_nary_tree_iter_init(&iterator, tree);
     static const char* argv[] = {"test1", "test2"};
     parser_check_expression_component(&iterator,
         sizeof(argv) / sizeof(argv[0]), argv);
@@ -147,42 +147,42 @@ TEST(HbParser, Multiple) {
 }
 
 static const char* UNCLOSED_EXPRESSION_ERROR_TEST = "{{test";
-TEST(HbParser, UnclosedExpressionError) {
+TEST(HbsParser, UnclosedExpressionError) {
     parser_verification_setup(UNCLOSED_EXPRESSION_ERROR_TEST);
-    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(1, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NULL(tree);
 }
 
 static const char* MISMATCHED_HANDLEBARS_ERROR_TEST = "}}";
-TEST(HbParser, MismatchedHandlebarsError) {
+TEST(HbsParser, MismatchedHandlebarsError) {
     parser_verification_setup(MISMATCHED_HANDLEBARS_ERROR_TEST);
-    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(1, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NULL(tree);
 }
 
 static const char* NESTED_EXPRESSION_ERROR_TEST = "{{test {{";
-TEST(HbParser, NestedExpressionError) {
+TEST(HbsParser, NestedExpressionError) {
     parser_verification_setup(NESTED_EXPRESSION_ERROR_TEST);
-    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(1, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NULL(tree);
 }
 
 static const char* EMPTY_EXPRESSION_ERROR_TEST = "{{}}";
-TEST(HbParser, EmptyExpressionError) {
+TEST(HbsParser, EmptyExpressionError) {
     parser_verification_setup(EMPTY_EXPRESSION_ERROR_TEST);
-    TEST_ASSERT_EQUAL_INT(1, hb_parser_parse(parser, &tree));
+    TEST_ASSERT_EQUAL_INT(1, hbs_parser_parse(parser, &tree));
     TEST_ASSERT_NULL(tree);
 }
 
-TEST_GROUP_RUNNER(HbParser) {
-    RUN_TEST_CASE(HbParser, Text);
-    RUN_TEST_CASE(HbParser, Handlebars);
-    RUN_TEST_CASE(HbParser, Combination);
-    RUN_TEST_CASE(HbParser, Multiple);
-    RUN_TEST_CASE(HbParser, UnclosedExpressionError);
-    RUN_TEST_CASE(HbParser, MismatchedHandlebarsError);
-    RUN_TEST_CASE(HbParser, NestedExpressionError);
-    RUN_TEST_CASE(HbParser, EmptyExpressionError);
+TEST_GROUP_RUNNER(HbsParser) {
+    RUN_TEST_CASE(HbsParser, Text);
+    RUN_TEST_CASE(HbsParser, Handlebars);
+    RUN_TEST_CASE(HbsParser, Combination);
+    RUN_TEST_CASE(HbsParser, Multiple);
+    RUN_TEST_CASE(HbsParser, UnclosedExpressionError);
+    RUN_TEST_CASE(HbsParser, MismatchedHandlebarsError);
+    RUN_TEST_CASE(HbsParser, NestedExpressionError);
+    RUN_TEST_CASE(HbsParser, EmptyExpressionError);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

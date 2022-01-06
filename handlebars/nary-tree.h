@@ -8,7 +8,7 @@
 //
 // CREATED:         12/17/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -34,28 +34,28 @@
 #ifndef HANDLEBARS_NARY_TREE_H
 #define HANDLEBARS_NARY_TREE_H
 
-typedef struct HbNaryNode HbNaryNode;
-typedef struct HbNaryTree HbNaryTree;
-typedef struct HbNaryTreeIter {
+typedef struct HbsNaryNode HbsNaryNode;
+typedef struct HbsNaryTree HbsNaryTree;
+typedef struct HbsNaryTreeIter {
     size_t index;
-    HbNaryTree* tree;
-} HbNaryTreeIter;
+    HbsNaryTree* tree;
+} HbsNaryTreeIter;
 
 
-HbNaryTree* hb_nary_tree_new();
-void hb_nary_tree_free(HbNaryTree** tree);
-HbNaryNode* hb_nary_tree_get_root(HbNaryTree* tree);
-void hb_nary_tree_set_root(HbNaryTree* tree, HbNaryNode* node);
-int hb_nary_tree_append_child_to_node(HbNaryTree* tree, HbNaryNode* parent,
-    HbNaryNode* child);
+HbsNaryTree* hbs_nary_tree_new();
+void hbs_nary_tree_free(HbsNaryTree** tree);
+HbsNaryNode* hbs_nary_tree_get_root(HbsNaryTree* tree);
+void hbs_nary_tree_set_root(HbsNaryTree* tree, HbsNaryNode* node);
+int hbs_nary_tree_append_child_to_node(HbsNaryTree* tree, HbsNaryNode* parent,
+    HbsNaryNode* child);
 
-HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data));
-HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node);
-void hb_nary_node_free(HbNaryNode* node);
-void* hb_nary_node_get_data(HbNaryNode* node);
+HbsNaryNode* hbs_nary_node_new(void* user_data, void(*free)(void* user_data));
+HbsNaryNode* hbs_nary_node_get_parent(HbsNaryNode* node);
+void hbs_nary_node_free(HbsNaryNode* node);
+void* hbs_nary_node_get_data(HbsNaryNode* node);
 
-void hb_nary_tree_iter_init(HbNaryTreeIter* iter, HbNaryTree* tree);
-HbNaryNode* hb_nary_tree_iter_next(HbNaryTreeIter* iter);
+void hbs_nary_tree_iter_init(HbsNaryTreeIter* iter, HbsNaryTree* tree);
+HbsNaryNode* hbs_nary_tree_iter_next(HbsNaryTreeIter* iter);
 
 #endif // HANDLEBARS_NARY_TREE_H
 

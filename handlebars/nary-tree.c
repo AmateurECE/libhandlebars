@@ -7,7 +7,7 @@
 //
 // CREATED:         12/17/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/06/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -37,15 +37,15 @@
 #include <handlebars/nary-tree.h>
 #include <handlebars/vector.h>
 
-typedef struct HbNaryNode {
-    HbNaryNode* parent;
+typedef struct HbsNaryNode {
+    HbsNaryNode* parent;
     void* user_data;
     void (*free)(void* user_data);
-} HbNaryNode;
+} HbsNaryNode;
 
-typedef struct HbNaryTree {
-    HbVector* nodes;
-} HbNaryTree;
+typedef struct HbsNaryTree {
+    HbsVector* nodes;
+} HbsNaryTree;
 
 typedef void VectorFreeFn(void*);
 
@@ -53,85 +53,85 @@ typedef void VectorFreeFn(void*);
 // Public API
 ////
 
-HbNaryTree* hb_nary_tree_new() {
-    HbNaryTree* tree = malloc(sizeof(HbNaryTree));
+HbsNaryTree* hbs_nary_tree_new() {
+    HbsNaryTree* tree = malloc(sizeof(HbsNaryTree));
     if (NULL == tree) {
         return NULL;
     }
 
-    memset(tree, 0, sizeof(HbNaryTree));
-    tree->nodes = hb_vector_init();
+    memset(tree, 0, sizeof(HbsNaryTree));
+    tree->nodes = hbs_vector_init();
     return tree;
 }
 
-void hb_nary_tree_free(HbNaryTree** tree) {
+void hbs_nary_tree_free(HbsNaryTree** tree) {
     if (NULL == *tree) {
         return;
     }
 
-    hb_vector_free(&(*tree)->nodes, (VectorFreeFn*)hb_nary_node_free);
+    hbs_vector_free(&(*tree)->nodes, (VectorFreeFn*)hbs_nary_node_free);
     free(*tree);
     *tree = NULL;
 }
 
-HbNaryNode* hb_nary_tree_get_root(HbNaryTree* tree)
+HbsNaryNode* hbs_nary_tree_get_root(HbsNaryTree* tree)
 { return tree->nodes->vector[tree->nodes->length - 1]; }
 
-void hb_nary_tree_set_root(HbNaryTree* tree, HbNaryNode* node) {
+void hbs_nary_tree_set_root(HbsNaryTree* tree, HbsNaryNode* node) {
     if (0 == tree->nodes->length) {
-        hb_vector_push_back(tree->nodes, node);
+        hbs_vector_push_back(tree->nodes, node);
     } else {
         tree->nodes->vector[tree->nodes->length - 1] = node;
     }
 }
 
-int hb_nary_tree_append_child_to_node(HbNaryTree* tree, HbNaryNode* parent,
-    HbNaryNode* child)
+int hbs_nary_tree_append_child_to_node(HbsNaryTree* tree, HbsNaryNode* parent,
+    HbsNaryNode* child)
 {
     size_t index = 0;
     for (index = tree->nodes->length - 1; index != SIZE_MAX; --index) {
-        HbNaryNode* node = tree->nodes->vector[index];
+        HbsNaryNode* node = tree->nodes->vector[index];
         if (node->parent == parent) {
             break;
         }
     }
 
-    hb_vector_insert(tree->nodes, index + 1, child);
+    hbs_vector_insert(tree->nodes, index + 1, child);
     child->parent = parent;
     return 0;
 }
 
-HbNaryNode* hb_nary_node_new(void* user_data, void(*free)(void* user_data)) {
-    HbNaryNode* node = malloc(sizeof(HbNaryNode));
+HbsNaryNode* hbs_nary_node_new(void* user_data, void(*free)(void* user_data)) {
+    HbsNaryNode* node = malloc(sizeof(HbsNaryNode));
     if (NULL == node) {
         return NULL;
     }
 
-    memset(node, 0, sizeof(HbNaryNode));
+    memset(node, 0, sizeof(HbsNaryNode));
     node->user_data = user_data;
     node->free = free;
     return node;
 }
 
-HbNaryNode* hb_nary_node_get_parent(HbNaryNode* node)
+HbsNaryNode* hbs_nary_node_get_parent(HbsNaryNode* node)
 { return node->parent; }
 
-void* hb_nary_node_get_data(HbNaryNode* node)
+void* hbs_nary_node_get_data(HbsNaryNode* node)
 { return node->user_data; }
 
-void hb_nary_node_free(HbNaryNode* node) {
+void hbs_nary_node_free(HbsNaryNode* node) {
     if (NULL != node->free) {
         node->free(node->user_data);
     }
     free(node);
 }
 
-void hb_nary_tree_iter_init(HbNaryTreeIter* iter, HbNaryTree* tree) {
+void hbs_nary_tree_iter_init(HbsNaryTreeIter* iter, HbsNaryTree* tree) {
     iter->index = 0;
     iter->tree = tree;
 }
 
-HbNaryNode* hb_nary_tree_iter_next(HbNaryTreeIter* iter) {
+HbsNaryNode* hbs_nary_tree_iter_next(HbsNaryTreeIter* iter) {
     if (iter->index >= iter->tree->nodes->length) {
         return NULL;
     }
