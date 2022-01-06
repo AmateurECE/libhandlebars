@@ -47,8 +47,6 @@ typedef struct HbsNaryTree {
     HbsVector* nodes;
 } HbsNaryTree;
 
-typedef void VectorFreeFn(void*);
-
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
 ////
@@ -65,7 +63,7 @@ HbsNaryTree* hbs_nary_tree_new() {
 }
 
 void hbs_nary_tree_free(HbsNaryTree* tree) {
-    hbs_vector_free(tree->nodes, (VectorFreeFn*)hbs_nary_node_free);
+    hbs_vector_free(tree->nodes, (VectorFreeDataFn*)hbs_nary_node_free);
     free(tree);
 }
 

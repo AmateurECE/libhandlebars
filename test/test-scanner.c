@@ -52,6 +52,10 @@ TEST_TEAR_DOWN(HbsScanner) {
     if (NULL != scanner) {
         hbs_scanner_free(scanner);
     }
+
+    if (NULL != input_context) {
+        hbs_input_context_free(input_context);
+    }
 }
 
 void scanner_token_verification_setup(const char* test_string) {

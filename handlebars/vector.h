@@ -41,11 +41,13 @@ typedef struct HbsVector {
     size_t capacity;
 } HbsVector;
 
+typedef void VectorFreeDataFn(void*);
+
 HbsVector* hbs_vector_new();
 int hbs_vector_push_back(HbsVector* vector, void* user_data);
 void* hbs_vector_pop_back(HbsVector* vector);
 int hbs_vector_insert(HbsVector* vector, size_t index, void* user_data);
-void hbs_vector_free(HbsVector*, void (*free_data)(void*));
+void hbs_vector_free(HbsVector*, VectorFreeDataFn* free_data);
 
 #endif // HANDLEBARS_VECTOR_H
 

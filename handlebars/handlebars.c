@@ -118,8 +118,10 @@ HbsTemplate* hbs_template_load(HbsInputContext* input_context) {
 
     memset(template, 0, sizeof(HbsTemplate));
     int parse_result = hbs_parser_parse(parser, &template->components);
+
+    hbs_parser_free(parser);
+    hbs_scanner_free(scanner);
     if (0 != parse_result) {
-        hbs_parser_free(parser);
         free(template);
         return NULL;
     }

@@ -49,16 +49,18 @@ typedef struct HbsParser {
 // Private API
 ////
 
-static void priv_parse_token_free(void* data) {
-    HbsParseToken* token = (HbsParseToken*)data;
+static void priv_parse_token_free(HbsParseToken* token) {
     hbs_token_release(token);
     free(token);
 }
 
 static void priv_component_free(void* data) {
     HbsComponent* component = (HbsComponent*)data;
-    if (NULL != component->text) {
+    if (HBS_COMPONENT_TEXT == component->type && NULL != component->text) {
         hbs_string_free(component->text);
+    } else if (HBS_COMPONENT_EXPRESSION == component->type &&
+        NULL != component->argv) {
+        hbs_vector_free(component->argv, (VectorFreeDataFn*)hbs_string_free);
     }
     free(data);
 }
@@ -90,7 +92,7 @@ static int priv_parse_handlebars(HbsParser* parser, HbsNaryTree* tree) {
     component->type = HBS_COMPONENT_EXPRESSION;
     component->argv = hbs_vector_new();
     while (HBS_TOKEN_OPEN_BARS != parser_top->type) {
-        hbs_token_release(parser_top);
+        priv_parse_token_free(parser_top);
         parser_top = hbs_vector_pop_back(parser->tokens);
         if (HBS_TOKEN_TEXT == parser_top->type) {
             HbsString* argument = hbs_string_new();
@@ -107,13 +109,14 @@ static int priv_parse_handlebars(HbsParser* parser, HbsNaryTree* tree) {
         }
     }
 
-    hbs_token_release(parser_top);
+    priv_parse_token_free(parser_top);
     HbsNaryNode* node = hbs_nary_node_new(component, priv_component_free);
     hbs_nary_tree_append_child_to_node(tree, parser->tree_top, node);
     return result;
 }
 
-static int priv_rule_handlebars(HbsParser* parser, HbsNaryTree* component_tree) {
+static int priv_rule_handlebars(HbsParser* parser, HbsNaryTree* component_tree)
+{
     int result = 1;
     HbsParseToken* parser_top = malloc(sizeof(HbsParseToken));
     if (NULL == parser_top) {
@@ -130,7 +133,7 @@ static int priv_rule_handlebars(HbsParser* parser, HbsNaryTree* component_tree) 
         // Pop this token from the stack and recurse
         HbsParseToken* ws_token = hbs_vector_pop_back(parser->tokens);
         assert(ws_token == parser_top);
-        hbs_token_release(parser_top);
+        priv_parse_token_free(parser_top);
         result = priv_rule_handlebars(parser, component_tree);
     } else {
         // TODO: Better error handling here
@@ -188,7 +191,7 @@ HbsParser* hbs_parser_new(HbsScanner* scanner) {
 
 // Free the parser and all associated internal memory.
 void hbs_parser_free(HbsParser* parser) {
-    hbs_vector_free(parser->tokens, priv_parse_token_free);
+    hbs_vector_free(parser->tokens, (VectorFreeDataFn*)priv_parse_token_free);
     free(parser);
 }
 

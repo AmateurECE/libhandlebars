@@ -48,7 +48,24 @@ TEST_GROUP(HbsParser);
 TEST_SETUP(HbsParser) {
     tree = NULL;
 }
-TEST_TEAR_DOWN(HbsParser) {}
+
+TEST_TEAR_DOWN(HbsParser) {
+    if (NULL != parser) {
+        hbs_parser_free(parser);
+    }
+
+    if (NULL != scanner) {
+        hbs_scanner_free(scanner);
+    }
+
+    if (NULL != input_context) {
+        hbs_input_context_free(input_context);
+    }
+
+    if (NULL != tree) {
+        hbs_nary_tree_free(tree);
+    }
+}
 
 static void parser_verification_setup(const char* string) {
     input_context = hbs_input_context_from_string(string);
