@@ -1,5 +1,3 @@
-* Align on "ownership passing ctors"
-* v0.3.0 Release
 * Memory leak investigation
 * Static analysis integration
 * Better handling of "expressions": e.g., support types like bool, int, etc.

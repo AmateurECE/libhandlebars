@@ -7,7 +7,7 @@
 #
 # CREATED:          11/20/2021
 #
-# LAST EDITED:      01/04/2022
+# LAST EDITED:      01/06/2022
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -30,7 +30,7 @@
 # IN THE SOFTWARE.
 ###
 
-project('libhandlebars', 'c', version: '0.2.0')
+project('libhandlebars', 'c', version: '0.3.0')
 
 libhandlebars_sources = files([
   'handlebars/handlebars.c',
