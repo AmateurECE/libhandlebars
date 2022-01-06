@@ -60,7 +60,7 @@ HbsNaryTree* hbs_nary_tree_new() {
     }
 
     memset(tree, 0, sizeof(HbsNaryTree));
-    tree->nodes = hbs_vector_init();
+    tree->nodes = hbs_vector_new();
     return tree;
 }
 

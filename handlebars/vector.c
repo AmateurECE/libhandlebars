@@ -64,7 +64,7 @@ static int hbs_priv_vector_extend(HbsVector* first, size_t needed_capacity) {
 // Public API
 ////
 
-HbsVector* hbs_vector_init() {
+HbsVector* hbs_vector_new() {
     HbsVector* vector = malloc(sizeof(HbsVector));
     if (NULL == vector) {
         return NULL;

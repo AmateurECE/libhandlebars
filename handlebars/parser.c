@@ -68,7 +68,7 @@ static int priv_parse_text(HbsParser* parser, HbsNaryTree* component_tree) {
     assert(HBS_TOKEN_TEXT == parser_top->type); // Programmer's error.
     HbsComponent* component = malloc(sizeof(HbsComponent));
     component->type = HBS_COMPONENT_TEXT;
-    component->text = hbs_string_init();
+    component->text = hbs_string_new();
     hbs_string_append(component->text, parser_top->string);
     HbsNaryNode* node = hbs_nary_node_new(component, priv_component_free);
     hbs_nary_tree_append_child_to_node(component_tree, parser->tree_top,
@@ -88,12 +88,12 @@ static int priv_parse_handlebars(HbsParser* parser, HbsNaryTree* tree) {
 
     int result = 0;
     component->type = HBS_COMPONENT_EXPRESSION;
-    component->argv = hbs_vector_init();
+    component->argv = hbs_vector_new();
     while (HBS_TOKEN_OPEN_BARS != parser_top->type) {
         hbs_token_release(parser_top);
         parser_top = hbs_vector_pop_back(parser->tokens);
         if (HBS_TOKEN_TEXT == parser_top->type) {
-            HbsString* argument = hbs_string_init();
+            HbsString* argument = hbs_string_new();
             hbs_string_append(argument, parser_top->string);
             hbs_vector_insert(component->argv, 0, argument);
         } else if (HBS_TOKEN_OPEN_BARS == parser_top->type) {
@@ -178,7 +178,7 @@ HbsParser* hbs_parser_new(HbsScanner* scanner) {
     }
 
     parser->scanner = scanner;
-    parser->tokens = hbs_vector_init();
+    parser->tokens = hbs_vector_new();
     if (NULL == parser->tokens) {
         free(parser);
         return NULL;

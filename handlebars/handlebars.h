@@ -74,7 +74,7 @@ typedef struct HbsString {
 } HbsString;
 
 // Initialize a string
-HbsString* hbs_string_init();
+HbsString* hbs_string_new();
 
 // Create a string from a C-style string (requires a copy)
 HbsString* hbs_string_from_str(const char* string);

@@ -90,7 +90,7 @@ static inline void priv_init_text_token(HbsParseToken* token,
     const HbsScanner* scanner)
 {
     priv_init_token(HBS_TOKEN_TEXT, token, scanner);
-    token->string = hbs_string_init();
+    token->string = hbs_string_new();
 }
 
 static inline void priv_init_open_bars_token(HbsParseToken* token,
@@ -105,7 +105,7 @@ static inline void priv_init_ws_token(HbsParseToken* token,
     const HbsScanner* scanner)
 {
     priv_init_token(HBS_TOKEN_WS, token, scanner);
-    token->string = hbs_string_init();
+    token->string = hbs_string_new();
 }
 
 static inline void priv_init_eof_token(HbsParseToken* token,

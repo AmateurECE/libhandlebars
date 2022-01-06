@@ -1,5 +1,4 @@
 * Consider removing Hbs/hbs_ prefix from some internal types?
-* Refactor ctors/dtors to be congruent with new/init free/release semantics
 * Align on "ownership passing ctors"
 * v0.3.0 Release
 * Memory leak investigation

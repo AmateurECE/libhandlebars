@@ -134,7 +134,7 @@ HbsTemplate* hbs_template_load(HbsInputContext* input_context) {
 HbsString* hbs_template_render(HbsTemplate* template,
     HbsHandlers* handlers)
 {
-    HbsString* result = hbs_string_init();
+    HbsString* result = hbs_string_new();
 
     HbsNaryTreeIter iterator;
     hbs_nary_tree_iter_init(&iterator, template->components);

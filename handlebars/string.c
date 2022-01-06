@@ -64,7 +64,7 @@ static int hbs_priv_string_extend(HbsString* first, size_t needed_capacity) {
 // Public API
 ////
 
-HbsString* hbs_string_init() {
+HbsString* hbs_string_new() {
     HbsString* string = malloc(sizeof(HbsString));
     if (NULL == string) {
         return NULL;
@@ -82,7 +82,7 @@ HbsString* hbs_string_init() {
 }
 
 HbsString* hbs_string_from_str(const char* content) {
-    HbsString* string = hbs_string_init();
+    HbsString* string = hbs_string_new();
     if (NULL == string) {
         return NULL;
     }

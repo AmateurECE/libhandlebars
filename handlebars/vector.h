@@ -41,7 +41,7 @@ typedef struct HbsVector {
     size_t capacity;
 } HbsVector;
 
-HbsVector* hbs_vector_init();
+HbsVector* hbs_vector_new();
 int hbs_vector_push_back(HbsVector* vector, void* user_data);
 void* hbs_vector_pop_back(HbsVector* vector);
 int hbs_vector_insert(HbsVector* vector, size_t index, void* user_data);
