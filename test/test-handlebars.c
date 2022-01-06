@@ -7,7 +7,7 @@
 //
 // CREATED:         01/04/2022
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/05/2022
 //
 // Copyright 2022, Ethan D. Twardy
 //
@@ -36,9 +36,9 @@
 
 #include <handlebars/handlebars.h>
 
-TEST_GROUP(Handlebars);
-TEST_SETUP(Handlebars) {}
-TEST_TEAR_DOWN(Handlebars) {}
+TEST_GROUP(HbTemplate);
+TEST_SETUP(HbTemplate) {}
+TEST_TEAR_DOWN(HbTemplate) {}
 
 static HbResult basic_key_handler(void* user_data __attribute__((unused)),
     const char* key, const char** value)
@@ -49,28 +49,28 @@ static HbResult basic_key_handler(void* user_data __attribute__((unused)),
 }
 
 static const char* BASIC_TEST = "The {{quick}} brown fox";
-TEST(Handlebars, Basic) {
-    HbInputContext* input = handlebars_input_context_from_string(BASIC_TEST);
-    Handlebars* template = handlebars_template_load(input);
+TEST(HbTemplate, Basic) {
+    HbInputContext* input = hb_input_context_from_string(BASIC_TEST);
+    HbTemplate* template = hb_template_load(input);
     TEST_ASSERT_NOT_NULL(template);
 
     HbHandlers handlers = {
         .key_handler = basic_key_handler,
         .key_handler_data = NULL,
     };
-    HbString* result = handlebars_template_render(template, &handlers);
+    HbString* result = hb_template_render(template, &handlers);
     TEST_ASSERT_NOT_NULL(result);
     static const char* rendered_result = "The sneaky brown fox";
     TEST_ASSERT_EQUAL_STRING(rendered_result, result->string);
     TEST_ASSERT_EQUAL_INT(strlen(rendered_result), result->length);
 
     hb_string_free(&result);
-    handlebars_template_free(&template);
-    handlebars_input_context_free(&input);
+    hb_template_free(&template);
+    hb_input_context_free(&input);
 }
 
-TEST_GROUP_RUNNER(Handlebars) {
-    RUN_TEST_CASE(Handlebars, Basic);
+TEST_GROUP_RUNNER(HbTemplate) {
+    RUN_TEST_CASE(HbTemplate, Basic);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

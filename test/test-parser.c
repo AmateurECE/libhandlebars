@@ -51,7 +51,7 @@ TEST_SETUP(HbParser) {
 TEST_TEAR_DOWN(HbParser) {}
 
 static void parser_verification_setup(const char* string) {
-    input_context = handlebars_input_context_from_string(string);
+    input_context = hb_input_context_from_string(string);
     scanner = hb_scanner_new(input_context);
     parser = hb_parser_new(scanner);
 }

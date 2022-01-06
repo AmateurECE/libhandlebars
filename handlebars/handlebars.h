@@ -8,7 +8,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/05/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -65,7 +65,7 @@ typedef struct HbHandlers {
 } HbHandlers;
 
 // Opaque struct representing a loaded Handlebars template.
-typedef struct Handlebars Handlebars;
+typedef struct HbTemplate HbTemplate;
 
 typedef struct HbString {
     char* string;
@@ -87,27 +87,26 @@ int hb_string_append_str(HbString* first, const char* second);
 void hb_string_free(HbString** string);
 
 // Create an input context from the file with the given path
-HbInputContext* handlebars_input_context_from_file(const char* filename);
+HbInputContext* hb_input_context_from_file(const char* filename);
 
 // Create an input context from a string
-HbInputContext* handlebars_input_context_from_string(const char* string);
+HbInputContext* hb_input_context_from_string(const char* string);
 
 // Free the input context (only necessary for HbInputContext instances created
 // using library convenience functions)
-void handlebars_input_context_free(HbInputContext** input_context);
+void hb_input_context_free(HbInputContext** input_context);
 
 // Load the template from the input context. After this, the input context
 // can be freed (if necessary).
-Handlebars* handlebars_template_load(HbInputContext* input_context);
+HbTemplate* hb_template_load(HbInputContext* input_context);
 
 // Render the template. <handlers> is used to obtain data ("context") for
 // rendering the template. The output is an HbString object which must be
 // free'd using hb_string_free() after use to prevent memory leaks.
-HbString* handlebars_template_render(Handlebars* template,
-    HbHandlers* handlers);
+HbString* hb_template_render(HbTemplate* template, HbHandlers* handlers);
 
 // Free the template
-void handlebars_template_free(Handlebars** template);
+void hb_template_free(HbTemplate** template);
 
 #endif // HANDLEBARS_H
 

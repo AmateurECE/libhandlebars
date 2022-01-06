@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/05/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -55,7 +55,7 @@ TEST_TEAR_DOWN(HbScanner) {
 }
 
 void scanner_token_verification_setup(const char* test_string) {
-    input_context = handlebars_input_context_from_string(test_string);
+    input_context = hb_input_context_from_string(test_string);
     scanner = hb_scanner_new(input_context);
 }
 

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/20/2021
 //
-// LAST EDITED:     01/04/2022
+// LAST EDITED:     01/05/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -43,9 +43,9 @@
 
 // This struct contains context necessary to parse the template and render it
 // using context.
-typedef struct Handlebars {
+typedef struct HbTemplate {
     HbNaryTree* components;
-} Handlebars;
+} HbTemplate;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private API
@@ -98,8 +98,8 @@ int priv_render_component(HbComponent* component, HbString* result,
 // a file, this function will construct the template components from the
 // contents of that file as it is on disk currently. The template is not
 // reloaded every time the template is rendered (unless explicitly done so).
-Handlebars* handlebars_template_load(HbInputContext* input_context) {
-    Handlebars* template = malloc(sizeof(Handlebars));
+HbTemplate* hb_template_load(HbInputContext* input_context) {
+    HbTemplate* template = malloc(sizeof(HbTemplate));
     if (NULL == template) {
         return NULL;
     }
@@ -116,7 +116,7 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
         return NULL;
     }
 
-    memset(template, 0, sizeof(Handlebars));
+    memset(template, 0, sizeof(HbTemplate));
     int parse_result = hb_parser_parse(parser, &template->components);
     if (0 != parse_result) {
         hb_parser_free(parser);
@@ -131,7 +131,7 @@ Handlebars* handlebars_template_load(HbInputContext* input_context) {
 // all context data and helpers (with the exception of the default helpers). If
 // the template contains expressions which don't match up to entries in the
 // context, those expressions are rendered as the empty string "".
-HbString* handlebars_template_render(Handlebars* template,
+HbString* hb_template_render(HbTemplate* template,
     HbHandlers* handlers)
 {
     HbString* result = hb_string_init();
@@ -154,7 +154,7 @@ HbString* handlebars_template_render(Handlebars* template,
 
 // Free the template components, relinquishing all allocated memory back to the
 // system.
-void handlebars_template_free(Handlebars** template) {
+void hb_template_free(HbTemplate** template) {
     if (NULL != *template) {
         if (NULL != (*template)->components) {
             hb_nary_tree_free(&(*template)->components);

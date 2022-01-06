@@ -1,4 +1,3 @@
-* Rename handlebars_* functions to be hb_*
 * Refactor all "free()" functions to be congruent with free(3) signature
 * Refactor ctors/dtors to be congruent with new/init free/release semantics
 * Align on "ownership passing ctors"

@@ -7,7 +7,7 @@
 //
 // CREATED:         11/21/2021
 //
-// LAST EDITED:     12/17/2021
+// LAST EDITED:     01/05/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -64,10 +64,9 @@ size_t hb_priv_read_string(void* data, char* buffer, size_t buffer_size)
 // Public API
 ////
 
-HbInputContext* handlebars_input_context_from_file(const char* filename);
+HbInputContext* hb_input_context_from_file(const char* filename);
 
-HbInputContext* handlebars_input_context_from_string(const char* string)
-{
+HbInputContext* hb_input_context_from_string(const char* string) {
     HbInputContext* context = malloc(sizeof(HbInputContext));
     if (NULL == context) {
         return NULL;
@@ -87,8 +86,7 @@ HbInputContext* handlebars_input_context_from_string(const char* string)
     return context;
 }
 
-void handlebars_input_context_free(HbInputContext** input_context)
-{
+void hb_input_context_free(HbInputContext** input_context) {
     if (NULL != *input_context) {
         if (NULL != (*input_context)->free_data) {
             (*input_context)->free_data((*input_context)->data);
