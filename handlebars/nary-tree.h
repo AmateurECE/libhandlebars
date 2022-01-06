@@ -43,7 +43,7 @@ typedef struct HbsNaryTreeIter {
 
 
 HbsNaryTree* hbs_nary_tree_new();
-void hbs_nary_tree_free(HbsNaryTree** tree);
+void hbs_nary_tree_free(HbsNaryTree* tree);
 HbsNaryNode* hbs_nary_tree_get_root(HbsNaryTree* tree);
 void hbs_nary_tree_set_root(HbsNaryTree* tree, HbsNaryNode* node);
 int hbs_nary_tree_append_child_to_node(HbsNaryTree* tree, HbsNaryNode* parent,

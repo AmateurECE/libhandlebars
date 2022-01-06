@@ -84,7 +84,7 @@ int hbs_string_append(HbsString* first, const HbsString* second);
 int hbs_string_append_str(HbsString* first, const char* second);
 
 // Free all memory associated with a string
-void hbs_string_free(HbsString** string);
+void hbs_string_free(HbsString* string);
 
 // Create an input context from the file with the given path
 HbsInputContext* hbs_input_context_from_file(const char* filename);
@@ -94,7 +94,7 @@ HbsInputContext* hbs_input_context_from_string(const char* string);
 
 // Free the input context (only necessary for HbsInputContext instances created
 // using library convenience functions)
-void hbs_input_context_free(HbsInputContext** input_context);
+void hbs_input_context_free(HbsInputContext* input_context);
 
 // Load the template from the input context. After this, the input context
 // can be freed (if necessary).
@@ -106,7 +106,7 @@ HbsTemplate* hbs_template_load(HbsInputContext* input_context);
 HbsString* hbs_template_render(HbsTemplate* template, HbsHandlers* handlers);
 
 // Free the template
-void hbs_template_free(HbsTemplate** template);
+void hbs_template_free(HbsTemplate* template);
 
 #endif // HANDLEBARS_H
 

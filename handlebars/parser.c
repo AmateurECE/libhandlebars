@@ -58,7 +58,7 @@ static void priv_parse_token_free(void* data) {
 static void priv_component_free(void* data) {
     HbsComponent* component = (HbsComponent*)data;
     if (NULL != component->text) {
-        hbs_string_free(&component->text);
+        hbs_string_free(component->text);
     }
     free(data);
 }
@@ -139,7 +139,8 @@ static int priv_rule_handlebars(HbsParser* parser, HbsNaryTree* component_tree) 
     return result;
 }
 
-static int priv_rule_expression(HbsParser* parser, HbsNaryTree* component_tree) {
+static int priv_rule_expression(HbsParser* parser, HbsNaryTree* component_tree)
+{
     HbsParseToken* parser_top = malloc(sizeof(HbsParseToken));
     if (NULL == parser_top) {
         return 1;
@@ -188,7 +189,7 @@ HbsParser* hbs_parser_new(HbsScanner* scanner) {
 
 // Free the parser and all associated internal memory.
 void hbs_parser_free(HbsParser* parser) {
-    hbs_vector_free(&parser->tokens, priv_parse_token_free);
+    hbs_vector_free(parser->tokens, priv_parse_token_free);
     hbs_scanner_free(parser->scanner);
     free(parser);
 }
@@ -212,7 +213,8 @@ int hbs_parser_parse(HbsParser* parser, HbsNaryTree** component_tree) {
 
     HbsNaryNode* node = hbs_nary_node_new(NULL, NULL);
     if (NULL == node) {
-        hbs_nary_tree_free(component_tree);
+        hbs_nary_tree_free(*component_tree);
+        *component_tree = NULL;
         return 1;
     }
     hbs_nary_tree_set_root(*component_tree, node);
@@ -222,7 +224,8 @@ int hbs_parser_parse(HbsParser* parser, HbsNaryTree** component_tree) {
     do {
         int parse_result = priv_rule_expression(parser, *component_tree);
         if (0 != parse_result) {
-            hbs_nary_tree_free(component_tree);
+            hbs_nary_tree_free(*component_tree);
+            *component_tree = NULL;
             return 1;
         }
 

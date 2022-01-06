@@ -114,12 +114,9 @@ int hbs_string_append_str(HbsString* first, const char* second)
     return 0;
 }
 
-void hbs_string_free(HbsString** string) {
-    if (NULL != *string) {
-        free((*string)->string);
-        free(*string);
-        *string = NULL;
-    }
+void hbs_string_free(HbsString* string) {
+    free(string->string);
+    free(string);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

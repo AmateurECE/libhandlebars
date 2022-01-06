@@ -144,7 +144,7 @@ HbsString* hbs_template_render(HbsTemplate* template,
     while (root != (element = hbs_nary_tree_iter_next(&iterator))) {
         HbsComponent* component = hbs_nary_node_get_data(element);
         if (0 != priv_render_component(component, result, handlers)) {
-            hbs_string_free(&result);
+            hbs_string_free(result);
             return NULL;
         }
     }
@@ -154,15 +154,12 @@ HbsString* hbs_template_render(HbsTemplate* template,
 
 // Free the template components, relinquishing all allocated memory back to the
 // system.
-void hbs_template_free(HbsTemplate** template) {
-    if (NULL != *template) {
-        if (NULL != (*template)->components) {
-            hbs_nary_tree_free(&(*template)->components);
-        }
-
-        free(*template);
-        *template = NULL;
+void hbs_template_free(HbsTemplate* template) {
+    if (NULL != template->components) {
+        hbs_nary_tree_free(template->components);
     }
+
+    free(template);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

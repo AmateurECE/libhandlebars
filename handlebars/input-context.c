@@ -86,13 +86,11 @@ HbsInputContext* hbs_input_context_from_string(const char* string) {
     return context;
 }
 
-void hbs_input_context_free(HbsInputContext** input_context) {
-    if (NULL != *input_context) {
-        if (NULL != (*input_context)->free_data) {
-            (*input_context)->free_data((*input_context)->data);
-        }
-        free(*input_context);
+void hbs_input_context_free(HbsInputContext* input_context) {
+    if (NULL != input_context->free_data) {
+        input_context->free_data(input_context->data);
     }
+    free(input_context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

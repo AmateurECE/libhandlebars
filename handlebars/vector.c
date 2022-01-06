@@ -121,20 +121,15 @@ int hbs_vector_insert(HbsVector* vector, size_t index, void* user_data) {
     return 0;
 }
 
-void hbs_vector_free(HbsVector** vector, void (*free_data)(void*)) {
-    if (NULL == *vector) {
-        return;
-    }
-
+void hbs_vector_free(HbsVector* vector, void (*free_data)(void*)) {
     if (NULL != free_data) {
-        for (size_t i = 0; i < (*vector)->length; ++i) {
-            free_data((*vector)->vector[i]);
+        for (size_t i = 0; i < vector->length; ++i) {
+            free_data(vector->vector[i]);
         }
     }
 
-    free((*vector)->vector);
-    free(*vector);
-    *vector = NULL;
+    free(vector->vector);
+    free(vector);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

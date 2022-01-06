@@ -64,9 +64,9 @@ TEST(HbsTemplate, Basic) {
     TEST_ASSERT_EQUAL_STRING(rendered_result, result->string);
     TEST_ASSERT_EQUAL_INT(strlen(rendered_result), result->length);
 
-    hbs_string_free(&result);
-    hbs_template_free(&template);
-    hbs_input_context_free(&input);
+    hbs_string_free(result);
+    hbs_template_free(template);
+    hbs_input_context_free(input);
 }
 
 TEST_GROUP_RUNNER(HbsTemplate) {

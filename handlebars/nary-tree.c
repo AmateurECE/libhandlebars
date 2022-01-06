@@ -64,14 +64,9 @@ HbsNaryTree* hbs_nary_tree_new() {
     return tree;
 }
 
-void hbs_nary_tree_free(HbsNaryTree** tree) {
-    if (NULL == *tree) {
-        return;
-    }
-
-    hbs_vector_free(&(*tree)->nodes, (VectorFreeFn*)hbs_nary_node_free);
-    free(*tree);
-    *tree = NULL;
+void hbs_nary_tree_free(HbsNaryTree* tree) {
+    hbs_vector_free(tree->nodes, (VectorFreeFn*)hbs_nary_node_free);
+    free(tree);
 }
 
 HbsNaryNode* hbs_nary_tree_get_root(HbsNaryTree* tree)

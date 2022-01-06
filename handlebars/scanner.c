@@ -284,7 +284,7 @@ const char* hbs_token_to_string(HbsParseTokenType type) {
 // the memory of <token> itself.
 void hbs_token_release(HbsParseToken* token) {
     if (HBS_TOKEN_TEXT == token->type || HBS_TOKEN_WS == token->type) {
-        hbs_string_free(&token->string);
+        hbs_string_free(token->string);
     }
 
     memset(token, 0, sizeof(HbsParseToken));
