@@ -169,8 +169,7 @@ static int priv_rule_expression(HbsParser* parser, HbsNaryTree* component_tree)
 // Public API
 ////
 
-// Create a new handlebars parser, injecting the scanner. The parser takes
-// ownership of and is responsible for freeing the scanner.
+// Create a new handlebars parser, injecting the scanner.
 HbsParser* hbs_parser_new(HbsScanner* scanner) {
     HbsParser* parser = malloc(sizeof(HbsParser));
     if (NULL == parser) {
@@ -190,7 +189,6 @@ HbsParser* hbs_parser_new(HbsScanner* scanner) {
 // Free the parser and all associated internal memory.
 void hbs_parser_free(HbsParser* parser) {
     hbs_vector_free(parser->tokens, priv_parse_token_free);
-    hbs_scanner_free(parser->scanner);
     free(parser);
 }
 

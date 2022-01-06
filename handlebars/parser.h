@@ -60,8 +60,7 @@ typedef struct HbsComponent {
     };
 } HbsComponent;
 
-// Create a new handlebars parser, injecting the scanner. The parser takes
-// ownership of and is responsible for freeing the scanner.
+// Create a new handlebars parser, injecting the scanner.
 HbsParser* hbs_parser_new(HbsScanner* scanner);
 
 // Free the parser and all associated internal memory.

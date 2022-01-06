@@ -1,9 +1,7 @@
-* Consider removing Hbs/hbs_ prefix from some internal types?
 * Align on "ownership passing ctors"
 * v0.3.0 Release
 * Memory leak investigation
 * Static analysis integration
-* Rename internal methods to remove any hb_ prefix
 * Better handling of "expressions": e.g., support types like bool, int, etc.
   This will require some refactoring in the parser.
 * Block expressions
@@ -12,6 +10,7 @@
 * HTML-escaping expressions
 * Whitespace-chomping expressions
 * Default handlers (e.g. link, each, etc.)
+* Consider removing Hbs/hbs_ prefix from some internal types?
 * Logger
 * v0.4.0 Release (Mostly production ready)
 * Allocation-free interface
