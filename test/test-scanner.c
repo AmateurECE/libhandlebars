@@ -108,11 +108,11 @@ TEST(HbsScanner, Whitespace) {
     scanner_token_verification_setup(WHITESPACE_TEST);
     scanner_token_compare(HBS_TOKEN_TEXT, "Text ", 1, 0);
     scanner_token_compare(HBS_TOKEN_OPEN_BARS, NULL, 1, 5);
-    hbs_scanner_enable_ws_token(scanner);
+    hbs_scanner_enable_hbs_tokens(scanner);
     scanner_token_compare(HBS_TOKEN_WS, " ", 1, 7);
     scanner_token_compare(HBS_TOKEN_TEXT, "whitespace", 1, 8);
     scanner_token_compare(HBS_TOKEN_WS, " ", 1, 18);
-    hbs_scanner_disable_ws_token(scanner);
+    hbs_scanner_disable_hbs_tokens(scanner);
     scanner_token_compare(HBS_TOKEN_CLOSE_BARS, NULL, 1, 19);
     scanner_token_compare(HBS_TOKEN_TEXT, ".", 1, 21);
     scanner_token_compare(HBS_TOKEN_EOF, NULL, -1, -1);
@@ -127,11 +127,20 @@ TEST(HbsScanner, Eof) {
 static const char* DOUBLE_WHITESPACE = "Text  text";
 TEST(HbsScanner, DoubleWhitespace) {
     scanner_token_verification_setup(DOUBLE_WHITESPACE);
-    hbs_scanner_enable_ws_token(scanner);
+    hbs_scanner_enable_hbs_tokens(scanner);
     scanner_token_compare(HBS_TOKEN_TEXT, "Text", 1, 0);
     scanner_token_compare(HBS_TOKEN_WS, "  ", 1, 4);
     scanner_token_compare(HBS_TOKEN_TEXT, "text", 1, 6);
     scanner_token_compare(HBS_TOKEN_EOF, NULL, -1, -1);
+}
+
+static const char* BLOCK_TOKENS = "#/";
+TEST(HbsScanner, BlockTokens) {
+    scanner_token_verification_setup(BLOCK_TOKENS);
+    hbs_scanner_enable_hbs_tokens(scanner);
+    scanner_token_compare(HBS_TOKEN_HASH, NULL, 1, 0);
+    scanner_token_compare(HBS_TOKEN_SLASH, NULL, 1, 1);
+    scanner_token_compare(HBS_TOKEN_EOF, NULL, 1, 2);
 }
 
 TEST_GROUP_RUNNER(HbsScanner) {
@@ -140,6 +149,7 @@ TEST_GROUP_RUNNER(HbsScanner) {
     RUN_TEST_CASE(HbsScanner, Whitespace);
     RUN_TEST_CASE(HbsScanner, Eof);
     RUN_TEST_CASE(HbsScanner, DoubleWhitespace);
+    RUN_TEST_CASE(HbsScanner, BlockTokens);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

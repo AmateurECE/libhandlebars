@@ -1,13 +1,11 @@
-* Memory leak investigation
-* Static analysis integration
+* Block expressions: Requires adding lookahead buffer to scanner
+* Default handlers (e.g. link, each, etc.)
 * Better handling of "expressions": e.g., support types like bool, int, etc.
   This will require some refactoring in the parser.
-* Block expressions
 * Escaping handlebars expressions like \{{sometext}}
 * Dot-slash "./" expressions
 * HTML-escaping expressions
 * Whitespace-chomping expressions
-* Default handlers (e.g. link, each, etc.)
 * Consider removing Hbs/hbs_ prefix from some internal types?
 * Logger
 * v0.4.0 Release (Mostly production ready)

@@ -51,6 +51,10 @@ typedef struct HbsScanner {
     // considered to be part of a HBS_TOKEN_TEXT token.
     bool ws_enabled;
 
+    // As with whitespace tokens above, if this flag is true, tokens for
+    // handlebars block expressions are enabled ("#" and "/").
+    bool blocks_enabled;
+
     // Provides a buffered, character-based input stream.
     CharStream stream;
 
@@ -107,6 +111,14 @@ static inline void priv_init_ws_token(HbsParseToken* token,
     priv_init_token(HBS_TOKEN_WS, token, scanner);
     token->string = hbs_string_new();
 }
+
+static inline void priv_init_hash_token(HbsParseToken* token,
+    const HbsScanner* scanner)
+{ priv_init_token(HBS_TOKEN_HASH, token, scanner); }
+
+static inline void priv_init_slash_token(HbsParseToken* token,
+    const HbsScanner* scanner)
+{ priv_init_token(HBS_TOKEN_SLASH, token, scanner); }
 
 static inline void priv_init_eof_token(HbsParseToken* token,
     const HbsScanner* scanner)
@@ -169,6 +181,24 @@ static void priv_consume_handlebars_token(HbsScanner* scanner) {
     priv_next_char(scanner);
 }
 
+static bool priv_is_hash_token(const CharStream* stream)
+{ return char_stream_peek(stream, 0) == '#'; }
+
+static void priv_consume_hash_token(HbsScanner* scanner) {
+    HbsParseToken* token = token_buffer_reserve(&scanner->token_buffer);
+    priv_init_hash_token(token, scanner);
+    priv_next_char(scanner);
+}
+
+static bool priv_is_slash_token(const CharStream* stream)
+{ return char_stream_peek(stream, 0) == '/'; }
+
+static void priv_consume_slash_token(HbsScanner* scanner) {
+    HbsParseToken* token = token_buffer_reserve(&scanner->token_buffer);
+    priv_init_slash_token(token, scanner);
+    priv_next_char(scanner);
+}
+
 static bool priv_is_eof_token(const CharStream* stream)
 { return '\0' == char_stream_peek(stream, 0); }
 
@@ -179,13 +209,20 @@ static void priv_consume_eof_token(HbsScanner* scanner) {
 
 static int priv_iterate_lexer(HbsScanner* scanner) {
     int result = 0;
-    if (priv_is_handlebars_token(&scanner->stream)) {
+    CharStream* stream = &scanner->stream;
+    if (priv_is_handlebars_token(stream)) {
         priv_consume_handlebars_token(scanner);
         result = 1;
-    } else if (scanner->ws_enabled && priv_is_ws_token(&scanner->stream)) {
+    } else if (scanner->ws_enabled && priv_is_ws_token(stream)) {
         priv_consume_ws_token(scanner);
         result = 1;
-    } else if (priv_is_eof_token(&scanner->stream)) {
+    } else if (scanner->blocks_enabled && priv_is_hash_token(stream)) {
+        priv_consume_hash_token(scanner);
+        result = 1;
+    } else if (scanner->blocks_enabled && priv_is_slash_token(stream)) {
+        priv_consume_slash_token(scanner);
+        result = 1;
+    } else if (priv_is_eof_token(stream)) {
         priv_consume_eof_token(scanner);
         result = 1;
     }
@@ -220,16 +257,16 @@ void hbs_scanner_free(HbsScanner* scanner) {
     free(scanner);
 }
 
-// These functions enable or disable the "whitespace" token. When we're not
+// These functions enable or disable the "handlebars" tokens. When we're not
 // parsing a handlebars expression, whitespace is signifigcant, so we want it
 // to remain intact with the text, but there's also no reason to interrupt the
-// parser to notify it of whitespace. This was an interesting design choice
-// aimed at simplifying the logic of the scanner at the expense of a slightly
-// more complex interface.
-void hbs_scanner_disable_ws_token(HbsScanner* scanner)
-{ scanner->ws_enabled = false; }
-void hbs_scanner_enable_ws_token(HbsScanner* scanner)
-{ scanner->ws_enabled = true; }
+// parser to notify it of whitespace. The same goes for the octothorpe and
+// forward slash symbols. This design choice was aimed at simplifying the logic
+// of the scanner at the expense of a slightly more complex interface.
+void hbs_scanner_disable_hbs_tokens(HbsScanner* scanner)
+{ scanner->ws_enabled = false; scanner->blocks_enabled = false; }
+void hbs_scanner_enable_hbs_tokens(HbsScanner* scanner)
+{ scanner->ws_enabled = true; scanner->blocks_enabled = true; }
 
 // Populate <token> with the next token from the stream. Return the number of
 // tokens processed (i.e. 1 for a successful scan).

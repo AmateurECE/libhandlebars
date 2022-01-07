@@ -42,9 +42,9 @@ typedef struct HbsString HbsString;
 
 // Valid parser tokens.
 typedef enum HbsParseTokenType {
-    HBS_TOKEN_NULL,          // '\0', or a named constant to signal no token
-    HBS_TOKEN_OPEN_BARS,     // "{{"
-    HBS_TOKEN_CLOSE_BARS,    // "}}"
+    HBS_TOKEN_NULL,         // '\0', or a named constant to signal no token
+    HBS_TOKEN_OPEN_BARS,    // "{{"
+    HBS_TOKEN_CLOSE_BARS,   // "}}"
 
     // This token is generated whenever interesting text is discovered. If the
     // ws token is enabled, this token is generated for word input, i.e. [\w]+,
@@ -54,7 +54,12 @@ typedef enum HbsParseTokenType {
     // This token may or may not be generated, based on the value of an
     // internal boolean, which can be enabled or disabled with the *_ws_token
     // functions. See their description for more info.
-    HBS_TOKEN_WS,            // [ \t\n]*
+    HBS_TOKEN_WS,           // [ \t\n]*
+
+    // These tokens, just like the whitespace token, may not be generated
+    // unless explicitly enabled by the parser.
+    HBS_TOKEN_HASH,         // "#"
+    HBS_TOKEN_SLASH,        // "/"
 
     HBS_TOKEN_EOF, // End of file (or stream)
 } HbsParseTokenType;
@@ -75,14 +80,14 @@ typedef struct HbsParseToken {
 // Create a new HbsScanner.
 HbsScanner* hbs_scanner_new(HbsInputContext* input_context);
 
-// These functions enable or disable the "whitespace" token. When we're not
+// These functions enable or disable the "handlebars" tokens. When we're not
 // parsing a handlebars expression, whitespace is signifigcant, so we want it
 // to remain intact with the text, but there's also no reason to interrupt the
-// parser to notify it of whitespace. This was an interesting design choice
-// aimed at simplifying the logic of the scanner at the expense of a slightly
-// more complex interface.
-void hbs_scanner_disable_ws_token(HbsScanner* scanner);
-void hbs_scanner_enable_ws_token(HbsScanner* scanner);
+// parser to notify it of whitespace. The same goes for the octothorpe and
+// forward slash symbols. This design choice was aimed at simplifying the logic
+// of the scanner at the expense of a slightly more complex interface.
+void hbs_scanner_disable_hbs_tokens(HbsScanner* scanner);
+void hbs_scanner_enable_hbs_tokens(HbsScanner* scanner);
 
 // Populate <token> with the next token from the stream. Return the number of
 // tokens processed (i.e. 1 for a successful scan).

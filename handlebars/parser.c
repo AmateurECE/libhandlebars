@@ -155,9 +155,9 @@ static int priv_rule_expression(HbsParser* parser, HbsNaryTree* component_tree)
     if (HBS_TOKEN_TEXT == parser_top->type) {
         result = priv_parse_text(parser, component_tree);
     } else if (HBS_TOKEN_OPEN_BARS == parser_top->type) {
-        hbs_scanner_enable_ws_token(parser->scanner);
+        hbs_scanner_enable_hbs_tokens(parser->scanner);
         result = priv_rule_handlebars(parser, component_tree);
-        hbs_scanner_disable_ws_token(parser->scanner);
+        hbs_scanner_disable_hbs_tokens(parser->scanner);
     } else if (HBS_TOKEN_EOF == parser_top->type) {
         result = 0; // Do nothing, but especially don't error. EOF is valid.
     } else {
