@@ -7,7 +7,7 @@
 //
 // CREATED:         12/30/2021
 //
-// LAST EDITED:     01/06/2022
+// LAST EDITED:     01/07/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -80,6 +80,15 @@ HbsParseToken* token_buffer_dequeue(TokenBuffer* buffer) {
     buffer->length -= 1;
     buffer->bottom = (buffer->bottom + 1) % buffer->capacity;
     return token;
+}
+
+// Peek at the token that would be popped with a call to _dequeue().
+HbsParseToken* token_buffer_peek(TokenBuffer* buffer) {
+    if (0 == buffer->length) {
+        return NULL;
+    }
+
+    return &buffer->buffer[buffer->bottom];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

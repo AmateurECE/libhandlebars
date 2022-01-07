@@ -7,7 +7,7 @@
 //
 // CREATED:         12/30/2021
 //
-// LAST EDITED:     01/06/2022
+// LAST EDITED:     01/07/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -38,7 +38,7 @@ typedef struct TokenBuffer {
     size_t length;          // Number of items currently in the buffer
     size_t top;             // Array index pointing to current "top"
     size_t bottom;          // Array index pointing to current "bottom"
-    HbsParseToken* buffer;   // Array of HbsParseTokens.
+    HbsParseToken* buffer;  // Array of HbsParseTokens.
 } TokenBuffer;
 
 // Initialize a TokenBuffer at <buffer>.
@@ -55,6 +55,9 @@ HbsParseToken* token_buffer_reserve(TokenBuffer* buffer);
 // De-queue a token from the bottom of the buffer (return a pointer to it) and
 // move the cursor to the next token in the buffer.
 HbsParseToken* token_buffer_dequeue(TokenBuffer* buffer);
+
+// Peek at the token that would be popped with a call to _dequeue().
+HbsParseToken* token_buffer_peek(TokenBuffer* buffer);
 
 #endif // HANDLEBARS_TOKEN_BUFFER_H
 

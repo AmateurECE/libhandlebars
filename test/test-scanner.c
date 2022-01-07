@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/06/2022
+// LAST EDITED:     01/07/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -143,6 +143,18 @@ TEST(HbsScanner, BlockTokens) {
     scanner_token_compare(HBS_TOKEN_EOF, NULL, 1, 2);
 }
 
+static const char* PEEK_TEST = "#/";
+TEST(HbsScanner, Peek) {
+    scanner_token_verification_setup(PEEK_TEST);
+    hbs_scanner_enable_hbs_tokens(scanner);
+    TEST_ASSERT_EQUAL_INT(HBS_TOKEN_HASH, hbs_scanner_peek(scanner));
+    scanner_token_compare(HBS_TOKEN_HASH, NULL, 1, 0);
+    TEST_ASSERT_EQUAL_INT(HBS_TOKEN_SLASH, hbs_scanner_peek(scanner));
+    scanner_token_compare(HBS_TOKEN_SLASH, NULL, 1, 1);
+    TEST_ASSERT_EQUAL_INT(HBS_TOKEN_EOF, hbs_scanner_peek(scanner));
+    scanner_token_compare(HBS_TOKEN_EOF, NULL, 1, 2);
+}
+
 TEST_GROUP_RUNNER(HbsScanner) {
     RUN_TEST_CASE(HbsScanner, Basic);
     RUN_TEST_CASE(HbsScanner, Token);
@@ -150,6 +162,7 @@ TEST_GROUP_RUNNER(HbsScanner) {
     RUN_TEST_CASE(HbsScanner, Eof);
     RUN_TEST_CASE(HbsScanner, DoubleWhitespace);
     RUN_TEST_CASE(HbsScanner, BlockTokens);
+    RUN_TEST_CASE(HbsScanner, Peek);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

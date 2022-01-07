@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/06/2022
+// LAST EDITED:     01/07/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -230,11 +230,28 @@ static int priv_iterate_lexer(HbsScanner* scanner) {
     return result;
 }
 
+// Fill the peek buffer with tokens.
+static int priv_fill_peek_buffer(HbsScanner* scanner) {
+    // This routine generates at least one token on every iteration.
+    HbsParseToken* text_token = NULL;
+    while (!priv_iterate_lexer(scanner)) {
+        if (NULL == text_token) {
+            text_token = token_buffer_reserve(&scanner->token_buffer);
+            priv_init_text_token(text_token, scanner);
+        }
+
+        char fragment[] = {priv_next_char(scanner), '\0'};
+        hbs_string_append_str(text_token->string, fragment);
+    }
+
+    return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Public API
 ////
 
-// Create a new HbsScanner.
+// Create a new HbsScanner. The scanner receives input from <input_context>.
 HbsScanner* hbs_scanner_new(HbsInputContext* input_context) {
     HbsScanner* scanner = malloc(sizeof(HbsScanner));
     if (NULL == scanner) {
@@ -279,16 +296,8 @@ int hbs_scanner_next_symbol(HbsScanner* scanner, HbsParseToken* token) {
         return 1;
     }
 
-    HbsParseToken* text_token = NULL;
-    while (!priv_iterate_lexer(scanner)) {
-        if (NULL == text_token) {
-            text_token = token_buffer_reserve(&scanner->token_buffer);
-            priv_init_text_token(text_token, scanner);
-        }
-
-        char fragment[] = {priv_next_char(scanner), '\0'};
-        hbs_string_append_str(text_token->string, fragment);
-    }
+    // Ensure the peek buffer is full before dequeueing.
+    priv_fill_peek_buffer(scanner);
 
     if (0 < scanner->token_buffer.length) {
         HbsParseToken* next = token_buffer_dequeue(&scanner->token_buffer);
@@ -297,6 +306,17 @@ int hbs_scanner_next_symbol(HbsScanner* scanner, HbsParseToken* token) {
     }
 
     return result;
+}
+
+// Peek at the type of the next token
+HbsParseTokenType hbs_scanner_peek(HbsScanner* scanner) {
+    HbsParseToken* top = token_buffer_peek(&scanner->token_buffer);
+    if (NULL == top) {
+        priv_fill_peek_buffer(scanner);
+        top = token_buffer_peek(&scanner->token_buffer);
+    }
+
+    return top->type;
 }
 
 // Return a string describing the Parser token type (for debugging purposes)

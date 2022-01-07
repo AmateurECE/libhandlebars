@@ -7,7 +7,7 @@
 //
 // CREATED:         12/28/2021
 //
-// LAST EDITED:     01/06/2022
+// LAST EDITED:     01/07/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -77,7 +77,7 @@ typedef struct HbsParseToken {
     HbsString* string;
 } HbsParseToken;
 
-// Create a new HbsScanner.
+// Create a new HbsScanner. The scanner receives input from <input_context>.
 HbsScanner* hbs_scanner_new(HbsInputContext* input_context);
 
 // These functions enable or disable the "handlebars" tokens. When we're not
@@ -92,6 +92,9 @@ void hbs_scanner_enable_hbs_tokens(HbsScanner* scanner);
 // Populate <token> with the next token from the stream. Return the number of
 // tokens processed (i.e. 1 for a successful scan).
 int hbs_scanner_next_symbol(HbsScanner* scanner, HbsParseToken* token);
+
+// Peek at the type of the next token
+HbsParseTokenType hbs_scanner_peek(HbsScanner* scanner);
 
 // Free internal memory assocaited with the scanner.
 void hbs_scanner_free(HbsScanner* scanner);
