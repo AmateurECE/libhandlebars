@@ -7,7 +7,7 @@
 //
 // CREATED:         12/29/2021
 //
-// LAST EDITED:     01/06/2022
+// LAST EDITED:     01/07/2022
 //
 // Copyright 2021, Ethan D. Twardy
 //
@@ -231,10 +231,9 @@ int hbs_parser_parse(HbsParser* parser, HbsNaryTree** component_tree) {
         }
 
         if (0 < parser->tokens->length) {
-            // If the first call parsed an entire expression, but didn't reach
-            // end of stream, the parser stack will be empty, and this will be
-            // a bad access.
             top = parser->tokens->vector[parser->tokens->length - 1];
+        } else {
+            top = NULL;
         }
     } while (NULL == top || HBS_TOKEN_EOF != top->type);
 

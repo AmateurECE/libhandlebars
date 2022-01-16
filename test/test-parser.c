@@ -7,7 +7,7 @@
 //
 // CREATED:         01/03/2022
 //
-// LAST EDITED:     01/06/2022
+// LAST EDITED:     01/07/2022
 //
 // Copyright 2022, Ethan D. Twardy
 //
@@ -191,6 +191,13 @@ TEST(HbsParser, EmptyExpressionError) {
     TEST_ASSERT_NULL(tree);
 }
 
+static const char* BLOCK_EXPRESSION_BASIC_TEST = "{{#block}}test{{/block}}";
+TEST(HbsParser, BlockExpressionBasic) {
+    parser_verification_setup(BLOCK_EXPRESSION_BASIC_TEST);
+    TEST_ASSERT_EQUAL_INT(0, hbs_parser_parse(parser, &tree));
+    TEST_ASSERT_NOT_NULL(tree);
+}
+
 TEST_GROUP_RUNNER(HbsParser) {
     RUN_TEST_CASE(HbsParser, Text);
     RUN_TEST_CASE(HbsParser, Handlebars);
@@ -200,6 +207,7 @@ TEST_GROUP_RUNNER(HbsParser) {
     RUN_TEST_CASE(HbsParser, MismatchedHandlebarsError);
     RUN_TEST_CASE(HbsParser, NestedExpressionError);
     RUN_TEST_CASE(HbsParser, EmptyExpressionError);
+    RUN_TEST_CASE(HbsParser, BlockExpressionBasic);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
